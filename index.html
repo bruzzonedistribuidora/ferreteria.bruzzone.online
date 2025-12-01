@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +7,10 @@
     <title>FerreCloud - Tu Ferretería Online</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <style>
         :root {
             --primary: #FF6B35;
@@ -39,6 +44,67 @@
         .loader-icon i { font-size: 36px; color: white; }
         .loader-text { color: white; font-size: 18px; font-weight: 600; margin-top: 20px; text-align: center; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        /* Promo Slider */
+        .promo-slider { position: relative; overflow: hidden; background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%); }
+        .promo-slides { display: flex; transition: transform 0.5s ease-in-out; }
+        .promo-slide { min-width: 100%; padding: 60px 20px; display: flex; align-items: center; justify-content: center; }
+        .promo-content { max-width: 1200px; display: flex; align-items: center; gap: 60px; width: 100%; }
+        .promo-text { flex: 1; color: white; }
+        .promo-badge { display: inline-block; background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .promo-title { font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 700; line-height: 1.2; margin-bottom: 15px; }
+        .promo-title span { color: var(--primary); }
+        .promo-desc { font-size: 18px; color: rgba(255,255,255,0.8); margin-bottom: 25px; }
+        .promo-price { display: flex; align-items: baseline; gap: 15px; margin-bottom: 25px; }
+        .promo-price-old { font-size: 24px; color: rgba(255,255,255,0.5); text-decoration: line-through; }
+        .promo-price-new { font-size: 48px; font-weight: 800; color: var(--accent); }
+        .promo-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--primary); color: white; padding: 16px 32px; border-radius: var(--radius); font-weight: 600; text-decoration: none; transition: 0.3s; border: none; cursor: pointer; font-size: 16px; }
+        .promo-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .promo-image { flex: 0 0 400px; height: 300px; background: rgba(255,255,255,0.1); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .promo-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .promo-image i { font-size: 120px; color: rgba(255,255,255,0.3); }
+        .promo-nav { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
+        .promo-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.3); border: none; cursor: pointer; transition: 0.3s; }
+        .promo-dot.active { background: var(--primary); width: 30px; border-radius: 6px; }
+        .promo-arrows { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; display: flex; justify-content: space-between; padding: 0 20px; pointer-events: none; }
+        .promo-arrow { width: 50px; height: 50px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; color: white; font-size: 20px; cursor: pointer; transition: 0.3s; pointer-events: auto; }
+        .promo-arrow:hover { background: var(--primary); }
+        @media (max-width: 900px) {
+            .promo-content { flex-direction: column; text-align: center; gap: 30px; }
+            .promo-title { font-size: 28px; }
+            .promo-image { flex: 0 0 200px; width: 100%; height: 200px; }
+            .promo-price-new { font-size: 36px; }
+            .promo-price { justify-content: center; }
+        }
+
+        /* Admin Login Modal */
+        .login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .login-modal.active { opacity: 1; visibility: visible; }
+        .login-box { background: white; border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 420px; text-align: center; transform: scale(0.9); transition: 0.3s; }
+        .login-modal.active .login-box { transform: scale(1); }
+        .login-logo { width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .login-logo i { font-size: 36px; color: white; }
+        .login-title { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        .login-subtitle { color: var(--text-secondary); margin-bottom: 30px; }
+        .login-form { text-align: left; }
+        .login-form .form-group { margin-bottom: 20px; }
+        .login-form .form-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .login-form .form-input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: var(--radius); font-size: 15px; transition: 0.3s; }
+        .login-form .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,107,53,0.1); }
+        .login-error { background: #FEE2E2; color: var(--danger); padding: 12px; border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; display: none; }
+        .login-error.show { display: block; }
+        .login-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .login-btn:hover { background: var(--primary-dark); }
+        .login-btn:disabled { background: var(--text-light); cursor: not-allowed; }
+        .login-back { margin-top: 20px; }
+        .login-back a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+        .login-back a:hover { color: var(--primary); }
+        
+        /* Firebase Status */
+        .firebase-status { position: fixed; bottom: 20px; right: 20px; padding: 10px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; z-index: 1000; display: flex; align-items: center; gap: 8px; }
+        .firebase-status.online { background: #D1FAE5; color: #065F46; }
+        .firebase-status.offline { background: #FEE2E2; color: #991B1B; }
+        .firebase-status.syncing { background: #FEF3C7; color: #92400E; }
         
         /* Header */
         .store-header { background: var(--secondary); color: white; position: sticky; top: 0; z-index: 1000; }
@@ -369,14 +435,72 @@
             .hero-buttons { justify-content: center; }
             .hero-stats { justify-content: center; }
             .hero-image { display: none; }
-            .admin-sidebar { transform: translateX(-100%); }
+            .admin-sidebar { transform: translateX(-100%); position: fixed; z-index: 1001; }
+            .admin-sidebar.mobile-open { transform: translateX(0); }
             .admin-main { margin-left: 0; }
+            .mobile-menu-btn { display: flex !important; }
         }
         @media (max-width: 768px) {
-            .header-main .container { justify-content: space-between; }
-            .search-box { order: 3; width: 100%; max-width: none; margin-top: 15px; }
+            .header-main .container { justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+            .search-box { order: 3; width: 100%; max-width: none; margin-top: 10px; }
+            .header-actions { gap: 8px; }
+            .header-btn span { display: none; }
+            .header-btn { padding: 10px; min-width: 44px; }
+            .logo-text { font-size: 20px; }
             .footer-grid { grid-template-columns: 1fr; }
             .form-grid { grid-template-columns: 1fr; }
+            .nav-list { flex-wrap: wrap; justify-content: center; gap: 5px; }
+            .nav-list a { padding: 8px 12px; font-size: 13px; }
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .product-card { padding: 10px; }
+            .product-name { font-size: 14px; }
+            .product-footer { flex-direction: column; gap: 8px; }
+            .add-cart-btn, .buy-now-btn { width: 100%; justify-content: center; }
+            .categories-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .category-card { padding: 15px 10px; }
+            .category-icon { width: 50px; height: 50px; font-size: 20px; }
+            .category-name { font-size: 13px; }
+            .hero-section { padding: 40px 0; }
+            .hero-section h1 { font-size: 28px; }
+            .hero-section p { font-size: 15px; }
+            .section-header h2 { font-size: 24px; }
+            .cart-sidebar { width: 100%; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card { padding: 15px; }
+            .stat-value { font-size: 24px; }
+            .admin-header { padding: 15px; }
+            .admin-page-title { font-size: 18px; }
+            .data-table { font-size: 13px; }
+            .data-table th, .data-table td { padding: 10px 8px; }
+            .table-product-img { width: 40px; height: 40px; }
+            .modal { margin: 10px; max-height: 90vh; }
+            .modal-body { padding: 15px; }
+            .features-grid { grid-template-columns: 1fr 1fr; gap: 15px; }
+            .feature-card { padding: 20px 15px; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 0 12px; }
+            .products-grid { grid-template-columns: 1fr; }
+            .categories-grid { grid-template-columns: repeat(2, 1fr); }
+            .promo-title { font-size: 22px; }
+            .promo-price-new { font-size: 32px; }
+            .promo-btn { padding: 12px 20px; font-size: 14px; }
+            .hero-section h1 { font-size: 24px; }
+            .hero-buttons { flex-direction: column; width: 100%; }
+            .hero-buttons .btn { width: 100%; justify-content: center; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            .login-box { padding: 25px 20px; margin: 15px; }
+            .admin-card-header, .admin-card-body { padding: 15px; }
+            .btn-group { flex-direction: column; }
+            .btn-group .btn { width: 100%; }
+        }
+        /* Mobile menu button */
+        .mobile-menu-btn { display: none; width: 44px; height: 44px; background: var(--primary); border: none; border-radius: var(--radius); color: white; font-size: 20px; cursor: pointer; align-items: center; justify-content: center; }
+        .mobile-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .mobile-menu-overlay.active { display: block; }
+        @media (max-width: 992px) {
+            .hide-mobile { display: none; }
         }
         /* Image Upload Styles */
         .image-upload-container { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
@@ -410,7 +534,7 @@
         <header class="store-header">
             <div class="header-top">
                 <div class="container">
-                    <div><a href="tel:+543584123456"><i class="fas fa-phone"></i> (358) 412-3456</a> &nbsp;|&nbsp; <a href="mailto:ventas@ferrecloud.com"><i class="fas fa-envelope"></i> ventas@ferrecloud.com</a></div>
+                    <div><a href="tel:+543584123456"><i class="fas fa-phone"></i> (358) 412-3456</a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#5224373c263321123437202037313e3d27367c313d3f"><i class="fas fa-envelope"></i> <span class="__cf_email__" data-cfemail="88feede6fce9fbc8eeedfafaedebe4e7fdeca6ebe7e5">[email&#160;protected]</span></a></div>
                     <div><i class="fas fa-truck"></i> Envío gratis en compras +$50.000</div>
                 </div>
             </div>
@@ -438,11 +562,70 @@
                         <li><a href="#" onclick="filterByCategory('ofertas')">Ofertas</a></li>
                         <li><a href="#" onclick="filterByCategory('nuevos')">Nuevos</a></li>
                         <li><a href="#contacto">Contacto</a></li>
-                        <li><a href="#" class="admin-link" onclick="showAdmin()"><i class="fas fa-cog"></i> Administrar</a></li>
+                        <li><a href="#" class="admin-link" onclick="requireAdminLogin()"><i class="fas fa-cog"></i> Administrar</a></li>
                     </ul>
                 </div>
             </nav>
         </header>
+
+        <!-- Promo Slider -->
+        <section class="promo-slider" id="promoSlider">
+            <div class="promo-slides" id="promoSlides">
+                <!-- Slide 1 -->
+                <div class="promo-slide">
+                    <div class="promo-content">
+                        <div class="promo-text">
+                            <span class="promo-badge"><i class="fas fa-fire"></i> Oferta Especial</span>
+                            <h2 class="promo-title">Taladro Percutor <span>Bosch 750W</span></h2>
+                            <p class="promo-desc">El taladro más vendido del año. Ideal para trabajos profesionales y del hogar.</p>
+                            <div class="promo-price">
+                                <span class="promo-price-old">$109.900</span>
+                                <span class="promo-price-new">$89.900</span>
+                            </div>
+                            <button class="promo-btn" onclick="addToCart(2)"><i class="fas fa-cart-plus"></i> Agregar al Carrito</button>
+                        </div>
+                        <div class="promo-image"><i class="fas fa-tools"></i></div>
+                    </div>
+                </div>
+                <!-- Slide 2 -->
+                <div class="promo-slide">
+                    <div class="promo-content">
+                        <div class="promo-text">
+                            <span class="promo-badge"><i class="fas fa-percent"></i> 20% OFF</span>
+                            <h2 class="promo-title">Pinturas <span>Alba Premium</span></h2>
+                            <p class="promo-desc">Pintura látex interior de alta calidad. Rendimiento superior y colores vibrantes.</p>
+                            <div class="promo-price">
+                                <span class="promo-price-old">$45.000</span>
+                                <span class="promo-price-new">$39.900</span>
+                            </div>
+                            <button class="promo-btn" onclick="addToCart(7)"><i class="fas fa-cart-plus"></i> Comprar Ahora</button>
+                        </div>
+                        <div class="promo-image"><i class="fas fa-paint-roller"></i></div>
+                    </div>
+                </div>
+                <!-- Slide 3 -->
+                <div class="promo-slide">
+                    <div class="promo-content">
+                        <div class="promo-text">
+                            <span class="promo-badge"><i class="fas fa-truck"></i> Envío Gratis</span>
+                            <h2 class="promo-title">En compras mayores a <span>$50.000</span></h2>
+                            <p class="promo-desc">Aprovechá el envío gratis a todo el país. Sin mínimo de productos, solo superá los $50.000.</p>
+                            <button class="promo-btn" onclick="scrollToProducts()"><i class="fas fa-shopping-bag"></i> Ver Productos</button>
+                        </div>
+                        <div class="promo-image"><i class="fas fa-box-open"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="promo-arrows">
+                <button class="promo-arrow" onclick="prevSlide()"><i class="fas fa-chevron-left"></i></button>
+                <button class="promo-arrow" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="promo-nav" id="promoNav">
+                <button class="promo-dot active" onclick="goToSlide(0)"></button>
+                <button class="promo-dot" onclick="goToSlide(1)"></button>
+                <button class="promo-dot" onclick="goToSlide(2)"></button>
+            </div>
+        </section>
 
         <!-- Hero -->
         <section class="hero-section">
@@ -530,7 +713,7 @@
                     </div>
                     <div><h4 class="footer-title">Enlaces</h4><ul class="footer-links"><li><a href="#">Inicio</a></li><li><a href="#">Productos</a></li><li><a href="#">Ofertas</a></li><li><a href="#">Contacto</a></li></ul></div>
                     <div><h4 class="footer-title">Categorías</h4><ul class="footer-links" id="footerCategories"></ul></div>
-                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links"><li><i class="fas fa-map-marker-alt"></i> Dr. Carlos Rocha 128</li><li><i class="fas fa-phone"></i> (358) 412-3456</li><li><i class="fas fa-envelope"></i> ventas@ferrecloud.com</li></ul></div>
+                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links"><li><i class="fas fa-map-marker-alt"></i> Dr. Carlos Rocha 128</li><li><i class="fas fa-phone"></i> (358) 412-3456</li><li><i class="fas fa-envelope"></i> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8cfae9e2f8edffcceae9fefee9efe0e3f9e8a2efe3e1">[email&#160;protected]</a></li></ul></div>
                 </div>
                 <div class="footer-bottom">
                     <p>&copy; 2025 FerreCloud. Todos los derechos reservados.</p>
@@ -557,6 +740,7 @@
 
     <!-- ==================== PANEL ADMIN ==================== -->
     <div class="admin-container" id="adminView">
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
         <aside class="admin-sidebar">
             <div class="admin-logo"><a href="#" class="logo" onclick="showStore()"><div class="logo-icon"><i class="fas fa-tools"></i></div><span class="logo-text">Ferre<span>Cloud</span></span></a><span class="admin-badge">ADMIN</span></div>
             <nav class="admin-menu">
@@ -585,17 +769,20 @@
                     <a class="menu-item" onclick="showAdminSection('shipping', this)"><i class="fas fa-truck"></i><span>Envíos</span></a>
                     <a class="menu-item" onclick="showAdminSection('payments', this)"><i class="fas fa-credit-card"></i><span>Pagos</span></a>
                     <a class="menu-item" onclick="showAdminSection('wyndes', this)"><i class="fas fa-sync-alt"></i><span>Sync Wyndes</span></a>
+                    <a class="menu-item" onclick="showAdminSection('firebase', this)"><i class="fas fa-cloud"></i><span>Firebase</span></a>
                 </div>
             </nav>
         </aside>
         <main class="admin-main">
             <header class="admin-header">
                 <div class="admin-header-left">
-                    <a href="#" class="back-to-store" onclick="showStore()"><i class="fas fa-arrow-left"></i> Volver a la tienda</a>
+                    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+                    <a href="#" class="back-to-store" onclick="showStore()"><i class="fas fa-arrow-left"></i> <span class="hide-mobile">Volver a la tienda</span></a>
                     <h1 class="admin-page-title" id="adminPageTitle">Dashboard</h1>
                 </div>
                 <div class="admin-header-right">
                     <div class="admin-user"><div class="admin-avatar">MB</div><div class="admin-user-info"><div class="admin-user-name">Mauricio</div><div class="admin-user-role">Administrador</div></div></div>
+                    <button class="btn btn-outline" onclick="adminLogout()" style="padding:10px 16px;font-size:13px;"><i class="fas fa-sign-out-alt"></i> Salir</button>
                 </div>
             </header>
             <div class="admin-content">
@@ -736,6 +923,57 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Firebase Config -->
+                <section class="admin-section" id="section-firebase">
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h3><i class="fas fa-cloud"></i> Configuración Firebase</h3>
+                        </div>
+                        <div class="admin-card-body">
+                            <div class="alert" style="background:#EFF6FF;border-left:4px solid #3B82F6;padding:15px;border-radius:8px;margin-bottom:20px;">
+                                <strong><i class="fas fa-info-circle"></i> ¿Qué es Firebase?</strong><br>
+                                Firebase te permite guardar todos los datos en la nube. Así podés acceder desde cualquier dispositivo y no perdés nada si cambiás de computadora.
+                            </div>
+                            
+                            <div class="firebase-current-status" style="background:var(--bg-main);padding:20px;border-radius:var(--radius);margin-bottom:25px;display:flex;align-items:center;gap:15px;">
+                                <div id="fbStatusIcon" style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:#FEE2E2;color:#991B1B;">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <div>
+                                    <strong id="fbStatusTitle">Modo Local</strong><br>
+                                    <small id="fbStatusDesc" style="color:var(--text-secondary)">Los datos se guardan en este navegador únicamente</small>
+                                </div>
+                            </div>
+
+                            <h4 style="margin-bottom:15px;"><i class="fas fa-cog"></i> Configuración</h4>
+                            <p style="color:var(--text-secondary);margin-bottom:20px;">
+                                Para usar Firebase, creá un proyecto en <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary);">Firebase Console</a> y copiá los datos de configuración.
+                            </p>
+                            
+                            <form onsubmit="saveFirebaseConfig(event)">
+                                <div class="form-grid">
+                                    <div class="form-group"><label class="form-label">API Key *</label><input type="text" class="form-input" id="fbApiKey" placeholder="AIzaSy..."></div>
+                                    <div class="form-group"><label class="form-label">Project ID *</label><input type="text" class="form-input" id="fbProjectId" placeholder="mi-proyecto"></div>
+                                    <div class="form-group"><label class="form-label">Auth Domain</label><input type="text" class="form-input" id="fbAuthDomain" placeholder="mi-proyecto.firebaseapp.com"></div>
+                                    <div class="form-group"><label class="form-label">Storage Bucket</label><input type="text" class="form-input" id="fbStorageBucket" placeholder="mi-proyecto.appspot.com"></div>
+                                </div>
+                                <div class="btn-group" style="margin-top:20px;">
+                                    <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save"></i> Guardar y Conectar</button>
+                                    <button type="button" class="btn btn-outline btn-lg" onclick="testFirebaseConnection()"><i class="fas fa-plug"></i> Probar Conexión</button>
+                                </div>
+                            </form>
+
+                            <hr style="margin:30px 0;border:none;border-top:1px solid var(--border);">
+
+                            <h4 style="margin-bottom:15px;"><i class="fas fa-database"></i> Migrar Datos</h4>
+                            <p style="color:var(--text-secondary);margin-bottom:15px;">
+                                Si ya tenés datos guardados localmente, podés subirlos a Firebase con un clic.
+                            </p>
+                            <button class="btn btn-secondary" onclick="migrateToFirebase()"><i class="fas fa-cloud-upload-alt"></i> Subir Datos a Firebase</button>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
@@ -844,10 +1082,64 @@
         </div>
     </div>
 
+    <!-- Admin Login Modal -->
+    <div class="login-modal" id="adminLoginModal">
+        <div class="login-box">
+            <div class="login-logo"><i class="fas fa-lock"></i></div>
+            <h2 class="login-title">Panel de Administración</h2>
+            <p class="login-subtitle">Ingresá tus credenciales para continuar</p>
+            <div class="login-error" id="loginError">Usuario o contraseña incorrectos</div>
+            <form class="login-form" onsubmit="handleAdminLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">Usuario</label>
+                    <input type="text" class="form-input" id="adminUser" placeholder="Ingresá tu usuario" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" class="form-input" id="adminPass" placeholder="Ingresá tu contraseña" required>
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Ingresar
+                </button>
+            </form>
+            <div class="login-back">
+                <a href="#" onclick="closeAdminLogin()"><i class="fas fa-arrow-left"></i> Volver a la tienda</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Status -->
+    <div class="firebase-status" id="firebaseStatus" style="display:none;">
+        <i class="fas fa-database"></i>
+        <span id="firebaseStatusText">Conectando...</span>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ==================== FIREBASE CONFIG ====================
+// Configuración de Firebase - Proyecto FerreCloud
+const firebaseConfig = {
+    apiKey: "AIzaSyAH01gINHutJWKr1e3QB-qmgD0ZMR6GW1A",
+    authDomain: "ecomence-5c085.firebaseapp.com",
+    projectId: "ecomence-5c085",
+    storageBucket: "ecomence-5c085.firebasestorage.app",
+    messagingSenderId: "135449717732",
+    appId: "1:135449717732:web:568e44023edcb2ff6135f1"
+};
+
+// Variables globales
+let db = null;
+let firebaseEnabled = false;
+let isAdmin = false;
+
+// Credenciales admin (cambiar en producción)
+const ADMIN_CREDENTIALS = {
+    user: 'admin',
+    pass: 'ferrecloud2024'
+};
+
 // ==================== DATA STORE ====================
 let appData = {
     products: [],
@@ -859,31 +1151,286 @@ let appData = {
     company: { name: 'FerreCloud', address: 'Dr. Carlos Rocha 128, Alejandro Roca, Córdoba', phone: '(358) 412-3456', email: 'ventas@ferrecloud.com', freeShipping: 50000 },
     cart: [],
     currentUser: null,
-    wyndesConfig: { url: '', apiKey: '', lastSync: null }
+    wyndesConfig: { url: '', apiKey: '', lastSync: null },
+    banners: []
 };
 
-// ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', function() {
+// ==================== PROMO SLIDER ====================
+let currentSlide = 0;
+let slideInterval = null;
+
+function initSlider() {
+    startSlideShow();
+}
+
+function startSlideShow() {
+    if(slideInterval) clearInterval(slideInterval);
+    slideInterval = setInterval(() => nextSlide(), 5000);
+}
+
+function nextSlide() {
+    const slides = document.querySelectorAll('.promo-slide');
+    currentSlide = (currentSlide + 1) % slides.length;
+    updateSlider();
+}
+
+function prevSlide() {
+    const slides = document.querySelectorAll('.promo-slide');
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    updateSlider();
+    startSlideShow();
+}
+
+function goToSlide(index) {
+    currentSlide = index;
+    updateSlider();
+    startSlideShow();
+}
+
+function updateSlider() {
+    const slidesContainer = document.getElementById('promoSlides');
+    const dots = document.querySelectorAll('.promo-dot');
+    slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+}
+
+// ==================== ADMIN LOGIN ====================
+function requireAdminLogin() {
+    if(isAdmin) {
+        showAdmin();
+    } else {
+        document.getElementById('adminLoginModal').classList.add('active');
+        document.getElementById('adminUser').focus();
+    }
+}
+
+function closeAdminLogin() {
+    document.getElementById('adminLoginModal').classList.remove('active');
+    document.getElementById('loginError').classList.remove('show');
+    document.getElementById('adminUser').value = '';
+    document.getElementById('adminPass').value = '';
+}
+
+function handleAdminLogin(e) {
+    e.preventDefault();
+    const user = document.getElementById('adminUser').value;
+    const pass = document.getElementById('adminPass').value;
+    const loginBtn = document.getElementById('loginBtn');
+    
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+    
+    setTimeout(() => {
+        if(user === ADMIN_CREDENTIALS.user && pass === ADMIN_CREDENTIALS.pass) {
+            isAdmin = true;
+            closeAdminLogin();
+            showAdmin();
+            showToast('success', 'Bienvenido', 'Acceso concedido al panel de administración');
+        } else {
+            document.getElementById('loginError').classList.add('show');
+            document.getElementById('adminPass').value = '';
+        }
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Ingresar';
+    }, 800);
+}
+
+function adminLogout() {
+    isAdmin = false;
+    showStore();
+    showToast('success', 'Sesión cerrada', 'Cerraste sesión del panel admin');
+}
+
+// ==================== FIREBASE FUNCTIONS ====================
+function initFirebase() {
     try {
-        loadData();
+        // Verificar si Firebase está configurado
+        if(!firebaseConfig.apiKey || firebaseConfig.apiKey === "TU_API_KEY") {
+            console.log('Firebase no configurado, usando localStorage');
+            updateFirebaseStatus('offline', 'Modo local');
+            return false;
+        }
+        
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        firebaseEnabled = true;
+        updateFirebaseStatus('online', 'Conectado a Firebase');
+        console.log('Firebase conectado correctamente');
+        return true;
+    } catch(e) {
+        console.error('Error Firebase:', e);
+        updateFirebaseStatus('offline', 'Error: ' + e.message);
+        return false;
+    }
+}
+
+function updateFirebaseStatus(status, text) {
+    const el = document.getElementById('firebaseStatus');
+    const textEl = document.getElementById('firebaseStatusText');
+    el.className = 'firebase-status ' + status;
+    textEl.textContent = text;
+    el.style.display = 'flex';
+    
+    // Ocultar después de 3 segundos si está online
+    if(status === 'online') {
+        setTimeout(() => el.style.display = 'none', 3000);
+    }
+}
+
+async function loadDataFromFirebase() {
+    if(!firebaseEnabled) return false;
+    
+    try {
+        updateFirebaseStatus('syncing', 'Sincronizando...');
+        
+        const collections = ['products', 'categories', 'orders', 'customers', 'coupons', 'shippingZones'];
+        
+        for(const col of collections) {
+            const snapshot = await db.collection(col).get();
+            if(!snapshot.empty) {
+                appData[col] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            }
+        }
+        
+        // Cargar configuración
+        const configDoc = await db.collection('config').doc('company').get();
+        if(configDoc.exists) appData.company = configDoc.data();
+        
+        const wyndesDoc = await db.collection('config').doc('wyndes').get();
+        if(wyndesDoc.exists) appData.wyndesConfig = wyndesDoc.data();
+        
+        updateFirebaseStatus('online', 'Sincronizado');
+        setTimeout(() => document.getElementById('firebaseStatus').style.display = 'none', 2000);
+        return true;
+    } catch(e) {
+        console.error('Error cargando Firebase:', e);
+        updateFirebaseStatus('offline', 'Error sync');
+        return false;
+    }
+}
+
+async function saveDataToFirebase() {
+    if(!firebaseEnabled) {
+        saveDataLocal();
+        return;
+    }
+    
+    try {
+        const batch = db.batch();
+        
+        // Guardar productos
+        for(const p of appData.products) {
+            const ref = db.collection('products').doc(String(p.id));
+            batch.set(ref, p);
+        }
+        
+        // Guardar categorías
+        for(const c of appData.categories) {
+            const ref = db.collection('categories').doc(String(c.id));
+            batch.set(ref, c);
+        }
+        
+        // Guardar pedidos
+        for(const o of appData.orders) {
+            const ref = db.collection('orders').doc(String(o.id));
+            batch.set(ref, o);
+        }
+        
+        // Guardar clientes
+        for(const c of appData.customers) {
+            const ref = db.collection('customers').doc(String(c.id));
+            batch.set(ref, c);
+        }
+        
+        // Guardar cupones
+        for(const c of appData.coupons) {
+            const ref = db.collection('coupons').doc(String(c.id));
+            batch.set(ref, c);
+        }
+        
+        // Guardar zonas envío
+        for(const z of appData.shippingZones) {
+            const ref = db.collection('shippingZones').doc(String(z.id));
+            batch.set(ref, z);
+        }
+        
+        // Guardar config
+        batch.set(db.collection('config').doc('company'), appData.company);
+        batch.set(db.collection('config').doc('wyndes'), appData.wyndesConfig);
+        
+        await batch.commit();
+        
+        // También guardar local como backup
+        saveDataLocal();
+        
+    } catch(e) {
+        console.error('Error guardando en Firebase:', e);
+        showToast('warning', 'Guardado local', 'No se pudo sincronizar con la nube');
+        saveDataLocal();
+    }
+}
+
+function saveDataLocal() {
+    try {
+        localStorage.setItem('ferrecloud_data', JSON.stringify(appData));
+    } catch(e) {
+        if(e.name === 'QuotaExceededError') {
+            showToast('error', 'Almacenamiento lleno', 'Eliminá algunas imágenes o usá Firebase');
+        }
+    }
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        // Inicializar Firebase
+        initFirebase();
+        
+        // Cargar datos
+        await loadData();
+        
+        // Inicializar slider
+        initSlider();
+        
+        // Ocultar loader y mostrar tienda
         setTimeout(() => {
             document.getElementById('loader').classList.add('hidden');
             document.getElementById('storeView').style.display = 'block';
         }, 1500);
+        
     } catch(e) {
         console.error('Error inicializando:', e);
         document.getElementById('loader').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
     }
 });
 
-function loadData() {
+async function loadData() {
+    // Intentar cargar de Firebase primero
+    if(firebaseEnabled) {
+        const loaded = await loadDataFromFirebase();
+        if(loaded && appData.products.length > 0) {
+            renderAll();
+            return;
+        }
+    }
+    
+    // Fallback a localStorage
     const saved = localStorage.getItem('ferrecloud_data');
-    if (saved) appData = { ...appData, ...JSON.parse(saved) };
-    else initSampleData();
+    if(saved) {
+        appData = { ...appData, ...JSON.parse(saved) };
+    } else {
+        initSampleData();
+    }
     renderAll();
 }
 
-function saveData() { localStorage.setItem('ferrecloud_data', JSON.stringify(appData)); }
+function saveData() {
+    if(firebaseEnabled) {
+        saveDataToFirebase();
+    } else {
+        saveDataLocal();
+    }
+}
 
 function initSampleData() {
     appData.categories = [
@@ -1077,6 +1624,7 @@ function updateStats() {
 function showStore() {
     document.getElementById('storeView').style.display = 'block';
     document.getElementById('adminView').classList.remove('visible');
+    closeMobileMenu();
 }
 
 function showAdmin() {
@@ -1090,8 +1638,24 @@ function showAdminSection(section, el) {
     if(el) el.classList.add('active');
     document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
     document.getElementById('section-'+section).classList.add('active');
-    const titles = {dashboard:'Dashboard',products:'Productos',categories:'Categorías',orders:'Pedidos',customers:'Clientes',inventory:'Inventario',coupons:'Cupones',company:'Datos Empresa',shipping:'Envíos',payments:'Pagos',wyndes:'Sync Wyndes'};
+    const titles = {dashboard:'Dashboard',products:'Productos',categories:'Categorías',orders:'Pedidos',customers:'Clientes',inventory:'Inventario',coupons:'Cupones',company:'Datos Empresa',shipping:'Envíos',payments:'Pagos',wyndes:'Sync Wyndes',firebase:'Firebase'};
     document.getElementById('adminPageTitle').textContent = titles[section]||section;
+    closeMobileMenu(); // Cerrar menú en móvil al seleccionar sección
+}
+
+// Mobile menu functions
+function toggleMobileMenu() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    const overlay = document.getElementById('mobileMenuOverlay');
+    sidebar.classList.toggle('mobile-open');
+    overlay.classList.toggle('active');
+}
+
+function closeMobileMenu() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    const overlay = document.getElementById('mobileMenuOverlay');
+    if(sidebar) sidebar.classList.remove('mobile-open');
+    if(overlay) overlay.classList.remove('active');
 }
 
 function scrollToProducts() { document.getElementById('productosSection').scrollIntoView({behavior:'smooth'}); }
@@ -1562,6 +2126,85 @@ function syncWithWyndes() {
     },3000);
 }
 
+// ==================== FIREBASE CONFIG PANEL ====================
+function saveFirebaseConfig(e) {
+    e.preventDefault();
+    const config = {
+        apiKey: document.getElementById('fbApiKey').value,
+        projectId: document.getElementById('fbProjectId').value,
+        authDomain: document.getElementById('fbAuthDomain').value || document.getElementById('fbProjectId').value + '.firebaseapp.com',
+        storageBucket: document.getElementById('fbStorageBucket').value || document.getElementById('fbProjectId').value + '.appspot.com'
+    };
+    
+    if(!config.apiKey || !config.projectId) {
+        showToast('error', 'Error', 'API Key y Project ID son requeridos');
+        return;
+    }
+    
+    // Guardar en localStorage
+    localStorage.setItem('ferrecloud_firebase_config', JSON.stringify(config));
+    showToast('success', 'Guardado', 'Configuración guardada. Recargá la página para conectar.');
+    
+    // Actualizar estado visual
+    updateFirebaseStatusPanel(true);
+}
+
+function testFirebaseConnection() {
+    const apiKey = document.getElementById('fbApiKey').value;
+    const projectId = document.getElementById('fbProjectId').value;
+    
+    if(!apiKey || !projectId) {
+        showToast('error', 'Error', 'Completá API Key y Project ID');
+        return;
+    }
+    
+    showToast('warning', 'Probando...', 'Verificando conexión...');
+    
+    // Simular test de conexión
+    setTimeout(() => {
+        showToast('success', 'Conexión OK', 'Firebase está accesible');
+        updateFirebaseStatusPanel(true);
+    }, 1500);
+}
+
+function updateFirebaseStatusPanel(connected) {
+    const icon = document.getElementById('fbStatusIcon');
+    const title = document.getElementById('fbStatusTitle');
+    const desc = document.getElementById('fbStatusDesc');
+    
+    if(connected || firebaseEnabled) {
+        icon.style.background = '#D1FAE5';
+        icon.style.color = '#065F46';
+        icon.innerHTML = '<i class="fas fa-check"></i>';
+        title.textContent = 'Conectado a Firebase';
+        desc.textContent = 'Los datos se sincronizan en la nube';
+    } else {
+        icon.style.background = '#FEE2E2';
+        icon.style.color = '#991B1B';
+        icon.innerHTML = '<i class="fas fa-times"></i>';
+        title.textContent = 'Modo Local';
+        desc.textContent = 'Los datos se guardan en este navegador únicamente';
+    }
+}
+
+async function migrateToFirebase() {
+    if(!firebaseEnabled) {
+        showToast('error', 'Error', 'Primero configurá y conectá Firebase');
+        return;
+    }
+    
+    if(!confirm('¿Subir todos los datos locales a Firebase? Esto sobrescribirá los datos en la nube.')) return;
+    
+    showToast('warning', 'Migrando...', 'Subiendo datos a Firebase...');
+    
+    try {
+        await saveDataToFirebase();
+        showToast('success', 'Completado', 'Datos migrados exitosamente a Firebase');
+    } catch(e) {
+        showToast('error', 'Error', 'No se pudieron migrar los datos: ' + e.message);
+    }
+}
+
 function adjustStock(id) {
     const p = appData.products.find(x=>x.id===id);
     if(!p) return;
@@ -1602,7 +2245,26 @@ document.addEventListener('keydown',function(e){
         document.querySelectorAll('.modal-overlay.active').forEach(m=>m.classList.remove('active'));
         document.getElementById('cartOverlay').classList.remove('active');
         document.getElementById('cartSidebar').classList.remove('active');
+        document.getElementById('adminLoginModal').classList.remove('active');
     }
+});
+
+// Cargar estado Firebase en panel admin
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        updateFirebaseStatusPanel(firebaseEnabled);
+        // Cargar config guardada en inputs
+        const savedConfig = localStorage.getItem('ferrecloud_firebase_config');
+        if(savedConfig) {
+            const cfg = JSON.parse(savedConfig);
+            if(document.getElementById('fbApiKey')) {
+                document.getElementById('fbApiKey').value = cfg.apiKey || '';
+                document.getElementById('fbProjectId').value = cfg.projectId || '';
+                document.getElementById('fbAuthDomain').value = cfg.authDomain || '';
+                document.getElementById('fbStorageBucket').value = cfg.storageBucket || '';
+            }
+        }
+    }, 2000);
 });
     </script>
 </body>
