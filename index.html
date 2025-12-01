@@ -1485,6 +1485,7 @@ function renderAll() {
     renderAdminTables();
     updateStats();
     updateCartUI();
+    loadCompanyData();
 }
 
 function updateCategoryProductCounts() {
@@ -2085,9 +2086,23 @@ function saveCompanyData(e) {
         instagram: document.getElementById('companyInstagram').value,
         description: document.getElementById('companyDescription').value,
         hours: document.getElementById('companyHours').value,
-        freeShipping: parseInt(document.getElementById('companyFreeShipping').value)
+        freeShipping: parseInt(document.getElementById('companyFreeShipping').value) || 50000
     };
     saveData(); showToast('success','Guardado','Datos actualizados');
+}
+
+function loadCompanyData() {
+    const c = appData.company || {};
+    document.getElementById('companyName').value = c.name || 'FerreCloud';
+    document.getElementById('companyCuit').value = c.cuit || '';
+    document.getElementById('companyAddress').value = c.address || '';
+    document.getElementById('companyPhone').value = c.phone || '';
+    document.getElementById('companyWhatsapp').value = c.whatsapp || '';
+    document.getElementById('companyEmail').value = c.email || '';
+    document.getElementById('companyInstagram').value = c.instagram || '';
+    document.getElementById('companyDescription').value = c.description || '';
+    document.getElementById('companyHours').value = c.hours || '';
+    document.getElementById('companyFreeShipping').value = c.freeShipping || 50000;
 }
 
 function savePaymentSettings(e) { e.preventDefault(); showToast('success','Guardado','Pagos configurados'); }
