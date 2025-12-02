@@ -848,7 +848,7 @@
                 <!-- Products -->
                 <section class="admin-section" id="section-products">
                     <div class="admin-card">
-                        <div class="card-header"><h3 class="card-title">Gestión de Productos</h3><div class="card-actions"><button class="btn btn-outline" onclick="exportProducts('csv')"><i class="fas fa-file-export"></i> Exportar</button><button class="btn btn-outline" onclick="showImportModal()"><i class="fas fa-file-import"></i> Importar</button><button class="btn btn-primary" onclick="showProductModal()"><i class="fas fa-plus"></i> Nuevo</button></div></div>
+                        <div class="card-header"><h3 class="card-title">Gestión de Productos</h3><div class="card-actions"><button class="btn btn-success" onclick="autoLoadAllImages()" title="Cargar imágenes automáticas a productos sin imagen"><i class="fas fa-magic"></i> Auto-Imágenes</button><button class="btn btn-outline" onclick="exportProducts('csv')"><i class="fas fa-file-export"></i> Exportar</button><button class="btn btn-outline" onclick="showImportModal()"><i class="fas fa-file-import"></i> Importar</button><button class="btn btn-primary" onclick="showProductModal()"><i class="fas fa-plus"></i> Nuevo</button></div></div>
                         <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>Producto</th><th>Código</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="productsTableBody"></tbody></table></div></div>
                     </div>
                 </section>
@@ -1102,6 +1102,9 @@
                                     <div class="image-upload-btn" onclick="document.getElementById('productImage').click()">
                                         <i class="fas fa-upload"></i> Subir imagen
                                         <input type="file" id="productImage" accept="image/*" style="display:none" onchange="handleProductImage(this)">
+                                    </div>
+                                    <div class="image-upload-btn" onclick="searchProductImage()" style="background:#10B981;color:white;">
+                                        <i class="fas fa-magic"></i> Buscar Automática
                                     </div>
                                     <div class="image-url-input">
                                         <input type="text" class="form-input" id="productImageUrl" placeholder="O pegar URL de imagen..." onchange="handleImageUrl(this.value)">
@@ -2237,6 +2240,197 @@ function removeProductImage() {
     document.getElementById('btnRemoveImage').style.display = 'none';
     document.getElementById('productImageUrl').value = '';
     document.getElementById('productImage').value = '';
+}
+
+// ==================== AUTO IMAGE SEARCH ====================
+// Palabras clave para traducir categorías de ferretería al inglés
+const imageKeywords = {
+    'herramienta': 'tool hardware',
+    'taladro': 'drill power tool',
+    'martillo': 'hammer tool',
+    'destornillador': 'screwdriver',
+    'pintura': 'paint brush roller',
+    'electricidad': 'electrical wire plug',
+    'plomeria': 'plumbing pipe faucet',
+    'jardin': 'garden tools',
+    'iluminacion': 'light bulb lamp',
+    'lampara': 'lamp light bulb',
+    'led': 'led light bulb',
+    'foco': 'light bulb',
+    'cable': 'electrical cable wire',
+    'enchufe': 'electrical plug socket',
+    'llave': 'wrench key tool',
+    'sierra': 'saw tool',
+    'amoladora': 'angle grinder',
+    'soldadora': 'welding machine',
+    'compresor': 'air compressor',
+    'escalera': 'ladder',
+    'cinta': 'tape measure',
+    'tornillo': 'screw bolt',
+    'clavo': 'nail hardware',
+    'candado': 'padlock lock',
+    'cerradura': 'door lock',
+    'bisagra': 'hinge hardware',
+    'grifo': 'faucet tap',
+    'canilla': 'faucet tap',
+    'manguera': 'garden hose',
+    'rociador': 'sprayer',
+    'bateria': 'battery power tool',
+    'cargador': 'charger',
+    'guante': 'work gloves safety',
+    'casco': 'safety helmet',
+    'lente': 'safety glasses',
+    'mascara': 'safety mask',
+    'balde': 'bucket pail',
+    'brocha': 'paint brush',
+    'rodillo': 'paint roller',
+    'lija': 'sandpaper',
+    'cemento': 'cement bag',
+    'adhesivo': 'adhesive glue',
+    'silicona': 'silicone sealant',
+    'cutter': 'utility knife cutter',
+    'nivel': 'level tool',
+    'metro': 'tape measure',
+    'alicate': 'pliers tool',
+    'pinza': 'pliers clamp',
+    'hogar': 'home hardware',
+    'cocina': 'kitchen hardware',
+    'baño': 'bathroom hardware'
+};
+
+function getImageSearchTerms(productName, category) {
+    // Convertir a minúsculas
+    const name = (productName || '').toLowerCase();
+    const cat = (category || '').toLowerCase();
+    
+    let terms = [];
+    
+    // Buscar palabras clave conocidas en el nombre del producto
+    for(const [spanish, english] of Object.entries(imageKeywords)) {
+        if(name.includes(spanish)) {
+            terms.push(english);
+        }
+    }
+    
+    // Si no encontró ninguna, usar palabras del nombre
+    if(terms.length === 0) {
+        // Tomar las primeras 3 palabras significativas
+        const words = name.split(/\s+/).filter(w => w.length > 3).slice(0, 3);
+        terms = words;
+    }
+    
+    // Agregar "tool" o "hardware" si es ferretería
+    if(cat.includes('herramienta') || cat.includes('bateria')) {
+        terms.push('power tool');
+    } else if(cat.includes('hogar')) {
+        terms.push('home hardware');
+    }
+    
+    // Agregar término genérico de ferretería
+    terms.push('hardware store');
+    
+    return terms.join(' ').substring(0, 50);
+}
+
+function searchProductImage() {
+    const name = document.getElementById('productName').value;
+    const category = document.getElementById('productCategory').value;
+    
+    if(!name) {
+        showToast('warning', 'Sin nombre', 'Primero ingresá el nombre del producto');
+        return;
+    }
+    
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:40px;color:var(--primary);"></i><span>Buscando...</span>';
+    
+    const searchTerms = getImageSearchTerms(name, category);
+    
+    // Usar múltiples fuentes de imágenes
+    const sources = [
+        `https://source.unsplash.com/800x600/?${encodeURIComponent(searchTerms)}`,
+        `https://source.unsplash.com/800x600/?tool,hardware`,
+        `https://source.unsplash.com/800x600/?construction,tool`
+    ];
+    
+    let currentSource = 0;
+    
+    function tryLoadImage() {
+        if(currentSource >= sources.length) {
+            preview.innerHTML = '<i class="fas fa-image"></i><span>No se encontró imagen</span>';
+            showToast('error', 'Error', 'No se pudo encontrar una imagen');
+            return;
+        }
+        
+        const url = sources[currentSource] + '&t=' + Date.now(); // Evitar caché
+        const img = new Image();
+        
+        img.onload = function() {
+            currentProductImage = url;
+            preview.innerHTML = `<img src="${url}" alt="Preview">`;
+            preview.classList.add('has-image');
+            document.getElementById('btnRemoveImage').style.display = 'inline-flex';
+            document.getElementById('productImageUrl').value = url;
+            showToast('success', 'Imagen encontrada', 'Podés buscar otra si no te gusta');
+        };
+        
+        img.onerror = function() {
+            currentSource++;
+            tryLoadImage();
+        };
+        
+        img.src = url;
+    }
+    
+    tryLoadImage();
+}
+
+async function autoLoadAllImages() {
+    const productsWithoutImage = appData.products.filter(p => !p.image);
+    
+    if(productsWithoutImage.length === 0) {
+        showToast('info', 'Info', 'Todos los productos ya tienen imagen');
+        return;
+    }
+    
+    const confirm = window.confirm(`¿Cargar imágenes automáticas para ${productsWithoutImage.length} productos sin imagen?\n\nEsto puede tardar unos segundos.`);
+    if(!confirm) return;
+    
+    showToast('info', 'Procesando', `Cargando imágenes para ${productsWithoutImage.length} productos...`);
+    
+    let loaded = 0;
+    let errors = 0;
+    
+    for(const product of productsWithoutImage) {
+        const searchTerms = getImageSearchTerms(product.name, product.category);
+        const url = `https://source.unsplash.com/800x600/?${encodeURIComponent(searchTerms)}&t=${Date.now()}_${product.id}`;
+        
+        // Verificar que la imagen carga
+        const success = await new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => {
+                product.image = url;
+                loaded++;
+                resolve(true);
+            };
+            img.onerror = () => {
+                errors++;
+                resolve(false);
+            };
+            img.src = url;
+            
+            // Timeout de 5 segundos
+            setTimeout(() => resolve(false), 5000);
+        });
+        
+        // Pequeña pausa para no saturar
+        await new Promise(r => setTimeout(r, 300));
+    }
+    
+    saveData();
+    renderAll();
+    
+    showToast('success', 'Completado', `${loaded} imágenes cargadas${errors > 0 ? `, ${errors} errores` : ''}`);
 }
 
 function editProduct(id) { showProductModal(id); }
