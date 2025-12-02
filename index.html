@@ -335,6 +335,22 @@
         
         /* Admin Cards */
         .admin-card { background: white; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 25px; }
+        
+        /* Banners Grid */
+        .banners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .banner-card { background: var(--bg-main); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+        .banner-preview { height: 180px; background: var(--secondary); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .banner-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .banner-preview i { font-size: 48px; color: rgba(255,255,255,0.3); }
+        .banner-order { position: absolute; top: 10px; left: 10px; background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+        .banner-status { position: absolute; top: 10px; right: 10px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .banner-status.active { background: #D1FAE5; color: #065F46; }
+        .banner-status.inactive { background: #FEE2E2; color: #991B1B; }
+        .banner-info { padding: 15px; }
+        .banner-title { font-weight: 600; margin-bottom: 5px; font-size: 15px; }
+        .banner-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
+        .banner-actions { display: flex; gap: 8px; }
+        .banner-actions .btn { flex: 1; padding: 8px; font-size: 13px; }
         .card-header { padding: 20px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
         .card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -353,6 +369,25 @@
         .status-active { background: rgba(0,200,83,0.1); color: var(--success); }
         .status-pending { background: rgba(255,184,0,0.1); color: var(--warning); }
         .status-inactive { background: rgba(255,71,87,0.1); color: var(--danger); }
+        .status-warning { background: rgba(255,152,0,0.1); color: #F57C00; }
+        .status-info { background: rgba(33,150,243,0.1); color: #1976D2; }
+        
+        /* Order Detail Styles */
+        .order-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .order-detail-section { background: var(--bg-main); padding: 15px; border-radius: var(--radius); }
+        .order-detail-section h4 { font-size: 14px; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .order-detail-section p { font-size: 14px; margin-bottom: 5px; color: var(--text-secondary); }
+        .order-items { max-height: 200px; overflow-y: auto; }
+        .order-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); }
+        .order-item:last-child { border-bottom: none; }
+        .order-item-name { font-weight: 500; }
+        .order-item-qty { color: var(--text-light); font-size: 13px; }
+        .order-item-price { font-weight: 600; color: var(--primary); }
+        .order-total { display: flex; justify-content: space-between; padding: 15px; background: var(--primary); color: white; border-radius: var(--radius); margin-top: 15px; font-size: 18px; }
+        .btn-success { background: #25D366; color: white; border: none; }
+        .btn-success:hover { background: #128C7E; }
+        @media (max-width: 600px) { .order-detail-grid { grid-template-columns: 1fr; } }
+        
         .action-btn { width: 36px; height: 36px; border: none; background: var(--bg-main); border-radius: 8px; cursor: pointer; transition: 0.3s; margin-right: 5px; }
         .action-btn:hover { background: var(--primary); color: white; }
         .action-btn.danger:hover { background: var(--danger); }
@@ -546,7 +581,7 @@
         <header class="store-header">
             <div class="header-top">
                 <div class="container">
-                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="mailto:" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText">ventas@ferrecloud.com</span></a></div>
+                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#95" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText"><span class="__cf_email__" data-cfemail="daacbfb4aebba99abcbfa8a8bfb9b6b5afbef4b9b5b7">[email&#160;protected]</span></span></a></div>
                     <div><i class="fas fa-truck"></i> Envío gratis en compras +$<span id="headerFreeShipping">50.000</span></div>
                 </div>
             </div>
@@ -725,7 +760,7 @@
                     </div>
                     <div><h4 class="footer-title">Enlaces</h4><ul class="footer-links"><li><a href="#">Inicio</a></li><li><a href="#">Productos</a></li><li><a href="#">Ofertas</a></li><li><a href="#">Contacto</a></li></ul></div>
                     <div><h4 class="footer-title">Categorías</h4><ul class="footer-links" id="footerCategories"></ul></div>
-                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail">ventas@ferrecloud.com</span></li></ul></div>
+                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="691f0c071d081a290f0c1b1b0c0a05061c0d470a0604">[email&#160;protected]</a></span></li></ul></div>
                 </div>
                 <div class="footer-bottom">
                     <p>&copy; 2025 <span id="footerCompanyName">FerreCloud</span>. Todos los derechos reservados.</p>
@@ -765,6 +800,7 @@
                     <div class="menu-title">Catálogo</div>
                     <a class="menu-item" onclick="showAdminSection('products', this)"><i class="fas fa-box"></i><span>Productos</span></a>
                     <a class="menu-item" onclick="showAdminSection('categories', this)"><i class="fas fa-tags"></i><span>Categorías</span></a>
+                    <a class="menu-item" onclick="showAdminSection('banners', this)"><i class="fas fa-images"></i><span>Banners</span></a>
                     <a class="menu-item" onclick="showAdminSection('inventory', this)"><i class="fas fa-warehouse"></i><span>Inventario</span></a>
                 </div>
                 <div class="menu-section">
@@ -820,6 +856,19 @@
                     <div class="admin-card">
                         <div class="card-header"><h3 class="card-title">Gestión de Categorías</h3><button class="btn btn-primary" onclick="showCategoryModal()"><i class="fas fa-plus"></i> Nueva</button></div>
                         <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>Icono</th><th>Nombre</th><th>Productos</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="categoriesTableBody"></tbody></table></div></div>
+                    </div>
+                </section>
+                <!-- Banners -->
+                <section class="admin-section" id="section-banners">
+                    <div class="admin-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Banners del Carrusel</h3>
+                            <button class="btn btn-primary" onclick="showBannerModal()"><i class="fas fa-plus"></i> Nuevo Banner</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info"><i class="fas fa-info-circle"></i><span>Tamaño recomendado: <strong>800 x 600 píxeles</strong>. Formatos: JPG, PNG. Peso máximo: 500KB</span></div>
+                            <div class="banners-grid" id="bannersGrid"></div>
+                        </div>
                     </div>
                 </section>
                 <!-- Orders -->
@@ -1072,6 +1121,105 @@
         </div>
     </div>
 
+    <!-- Order Detail Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header"><h3 class="modal-title">Detalle del Pedido #<span id="orderModalId"></span></h3><button class="modal-close" onclick="closeModal('orderModal')"><i class="fas fa-times"></i></button></div>
+            <div class="modal-body">
+                <div class="order-detail-grid">
+                    <div class="order-detail-section">
+                        <h4><i class="fas fa-user"></i> Cliente</h4>
+                        <p><strong id="orderCustomerName"></strong></p>
+                        <p id="orderCustomerPhone"></p>
+                        <p id="orderCustomerEmail"></p>
+                        <p id="orderCustomerAddress"></p>
+                    </div>
+                    <div class="order-detail-section">
+                        <h4><i class="fas fa-info-circle"></i> Información</h4>
+                        <p><strong>Fecha:</strong> <span id="orderDate"></span></p>
+                        <p><strong>Estado:</strong> <span id="orderStatus"></span></p>
+                        <p><strong>Método pago:</strong> <span id="orderPayment"></span></p>
+                    </div>
+                </div>
+                <div class="order-detail-section" style="margin-top:20px;">
+                    <h4><i class="fas fa-shopping-cart"></i> Productos</h4>
+                    <div class="order-items" id="orderItems"></div>
+                </div>
+                <div class="order-total">
+                    <span>Total del Pedido:</span>
+                    <strong id="orderTotal"></strong>
+                </div>
+                <div class="form-group" style="margin-top:20px;">
+                    <label class="form-label">Cambiar Estado</label>
+                    <select class="form-select" id="orderStatusSelect" onchange="updateOrderStatus()">
+                        <option value="pending">Pendiente</option>
+                        <option value="processing">En Proceso</option>
+                        <option value="shipped">Enviado</option>
+                        <option value="completed">Entregado</option>
+                        <option value="cancelled">Cancelado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Link de Pago (Mercado Pago, banco, etc.)</label>
+                    <div style="display:flex;gap:10px;">
+                        <input type="text" class="form-input" id="orderPaymentLink" placeholder="https://...">
+                        <button class="btn btn-primary" onclick="sendPaymentLinkFromModal()"><i class="fab fa-whatsapp"></i> Enviar</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notas internas</label>
+                    <textarea class="form-textarea" id="orderNotes" rows="2" placeholder="Notas sobre el pedido..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('orderModal')">Cerrar</button>
+                <button class="btn btn-success" onclick="contactCustomerFromModal()"><i class="fab fa-whatsapp"></i> Contactar</button>
+                <button class="btn btn-primary" onclick="saveOrderChanges()"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Banner Modal -->
+    <div class="modal-overlay" id="bannerModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header"><h3 class="modal-title" id="bannerModalTitle">Nuevo Banner</h3><button class="modal-close" onclick="closeModal('bannerModal')"><i class="fas fa-times"></i></button></div>
+            <div class="modal-body">
+                <form id="bannerForm"><input type="hidden" id="bannerId">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Título *</label><input type="text" class="form-input" id="bannerTitle" required placeholder="Oferta Especial"></div>
+                        <div class="form-group"><label class="form-label">Subtítulo</label><input type="text" class="form-input" id="bannerSubtitle" placeholder="¡No te lo pierdas!"></div>
+                    </div>
+                    <div class="form-group full"><label class="form-label">Descripción</label><input type="text" class="form-input" id="bannerDescription" placeholder="Descripción corta del banner"></div>
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Precio Anterior</label><input type="number" class="form-input" id="bannerOldPrice" placeholder="150000"></div>
+                        <div class="form-group"><label class="form-label">Precio Actual</label><input type="number" class="form-input" id="bannerNewPrice" placeholder="99000"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Texto del Botón</label><input type="text" class="form-input" id="bannerBtnText" placeholder="¡Lo Quiero!" value="¡Lo Quiero!"></div>
+                    <div class="form-group"><label class="form-label">Enlace del Botón</label><select class="form-select" id="bannerBtnAction">
+                        <option value="products">Ir a Productos</option>
+                        <option value="whatsapp">Abrir WhatsApp</option>
+                        <option value="category">Ir a Categoría</option>
+                    </select></div>
+                    <div class="form-group">
+                        <label class="form-label">Imagen del Banner (800x600 px recomendado)</label>
+                        <div class="image-upload-container">
+                            <div class="image-preview" id="bannerImagePreview"><i class="fas fa-image"></i><span>Sin imagen</span></div>
+                            <div class="image-upload-options">
+                                <div class="form-group"><label class="form-label">Subir imagen</label><input type="file" class="form-input" id="bannerImageFile" accept="image/*" onchange="handleBannerImage(this)"></div>
+                                <div class="form-group"><label class="form-label">O pegar URL</label><input type="text" class="form-input" id="bannerImageUrl" placeholder="https://..." onchange="handleBannerImageUrl(this.value)"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Orden</label><input type="number" class="form-input" id="bannerOrder" value="1" min="1"></div>
+                        <div class="form-group"><label class="checkbox-item" style="margin-top: 30px;"><input type="checkbox" id="bannerActive" checked><span>Activo</span></label></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('bannerModal')">Cancelar</button><button class="btn btn-primary" onclick="saveBanner()"><i class="fas fa-save"></i> Guardar</button></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="importModal">
         <div class="modal" style="max-width: 550px;">
             <div class="modal-header"><h3 class="modal-title">Importar Productos</h3><button class="modal-close" onclick="closeModal('importModal')"><i class="fas fa-times"></i></button></div>
@@ -1140,7 +1288,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ==================== FIREBASE CONFIG ====================
 // Configuración de Firebase - Proyecto FerreCloud
 const firebaseConfig = {
@@ -1183,6 +1331,7 @@ let currentSlide = 0;
 let slideInterval = null;
 
 function initSlider() {
+    renderSlider();
     startSlideShow();
 }
 
@@ -1306,7 +1455,7 @@ async function loadDataFromFirebase() {
     try {
         updateFirebaseStatus('syncing', 'Sincronizando...');
         
-        const collections = ['products', 'categories', 'orders', 'customers', 'coupons', 'shippingZones'];
+        const collections = ['products', 'categories', 'orders', 'customers', 'coupons', 'shippingZones', 'banners'];
         
         for(const col of collections) {
             const snapshot = await db.collection(col).get();
@@ -1375,6 +1524,12 @@ async function saveDataToFirebase() {
         for(const z of appData.shippingZones) {
             const ref = db.collection('shippingZones').doc(String(z.id));
             batch.set(ref, z);
+        }
+        
+        // Guardar banners
+        for(const b of appData.banners) {
+            const ref = db.collection('banners').doc(String(b.id));
+            batch.set(ref, b);
         }
         
         // Guardar config
@@ -1507,6 +1662,7 @@ function renderAll() {
     renderCategories();
     renderProducts();
     renderAdminTables();
+    renderBannersAdmin();
     updateStats();
     updateCartUI();
     loadCompanyData();
@@ -1598,9 +1754,21 @@ function renderAdminTables() {
 
     // Orders
     document.getElementById('ordersTableBody').innerHTML = appData.orders.map(o => {
-        const st = {pending:'Pendiente',processing:'En Proceso',shipped:'Enviado',completed:'Completado'}[o.status];
-        const cl = o.status==='completed'?'status-active':o.status==='pending'?'status-pending':'status-inactive';
-        return `<tr><td><strong>#${o.id}</strong></td><td>${o.customer}</td><td>${o.date}</td><td><strong>$${formatNumber(o.total)}</strong></td><td><span class="status-badge ${cl}">${st}</span></td><td><button class="action-btn" onclick="viewOrder(${o.id})"><i class="fas fa-eye"></i></button></td></tr>`;
+        const st = {pending:'Pendiente',processing:'En Proceso',shipped:'Enviado',completed:'Entregado',cancelled:'Cancelado'}[o.status] || 'Pendiente';
+        const cl = {completed:'status-active',pending:'status-pending',processing:'status-warning',shipped:'status-info',cancelled:'status-inactive'}[o.status] || 'status-pending';
+        return `<tr>
+            <td><strong>#${o.id}</strong></td>
+            <td><div>${o.customer}</div><small style="color:var(--text-light)">${o.phone || ''}</small></td>
+            <td>${o.date}</td>
+            <td><strong>$${formatNumber(o.total)}</strong></td>
+            <td><span class="status-badge ${cl}">${st}</span></td>
+            <td>
+                <button class="action-btn" onclick="viewOrderDetail(${o.id})" title="Ver detalle"><i class="fas fa-eye"></i></button>
+                <button class="action-btn" onclick="changeOrderStatus(${o.id})" title="Cambiar estado"><i class="fas fa-exchange-alt"></i></button>
+                <button class="action-btn" onclick="sendPaymentLink(${o.id})" title="Enviar link de pago"><i class="fas fa-credit-card"></i></button>
+                <button class="action-btn" onclick="contactCustomerOrder(${o.id})" title="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></button>
+            </td>
+        </tr>`;
     }).join('');
 
     // Customers
@@ -1663,7 +1831,7 @@ function showAdminSection(section, el) {
     if(el) el.classList.add('active');
     document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
     document.getElementById('section-'+section).classList.add('active');
-    const titles = {dashboard:'Dashboard',products:'Productos',categories:'Categorías',orders:'Pedidos',customers:'Clientes',inventory:'Inventario',coupons:'Cupones',company:'Datos Empresa',shipping:'Envíos',payments:'Pagos',wyndes:'Sync Wyndes',firebase:'Firebase'};
+    const titles = {dashboard:'Dashboard',products:'Productos',categories:'Categorías',banners:'Banners',orders:'Pedidos',customers:'Clientes',inventory:'Inventario',coupons:'Cupones',company:'Datos Empresa',shipping:'Envíos',payments:'Pagos',wyndes:'Sync Wyndes',firebase:'Firebase'};
     document.getElementById('adminPageTitle').textContent = titles[section]||section;
     closeMobileMenu(); // Cerrar menú en móvil al seleccionar sección
 }
@@ -2060,6 +2228,216 @@ function deleteCoupon(id) {
     if(confirm('¿Eliminar este cupón?')) {
         appData.coupons = appData.coupons.filter(c=>c.id!==id);
         saveData(); renderAll(); showToast('success','Eliminado','Cupón eliminado');
+    }
+}
+
+// ==================== BANNERS ====================
+let currentBannerImage = '';
+
+function showBannerModal(id = null) {
+    document.getElementById('bannerModalTitle').textContent = id ? 'Editar Banner' : 'Nuevo Banner';
+    document.getElementById('bannerForm').reset();
+    document.getElementById('bannerId').value = '';
+    currentBannerImage = '';
+    document.getElementById('bannerImagePreview').innerHTML = '<i class="fas fa-image"></i><span>Sin imagen</span>';
+    
+    if(id) {
+        const b = appData.banners.find(x => x.id === id);
+        if(b) {
+            document.getElementById('bannerId').value = b.id;
+            document.getElementById('bannerTitle').value = b.title || '';
+            document.getElementById('bannerSubtitle').value = b.subtitle || '';
+            document.getElementById('bannerDescription').value = b.description || '';
+            document.getElementById('bannerOldPrice').value = b.oldPrice || '';
+            document.getElementById('bannerNewPrice').value = b.newPrice || '';
+            document.getElementById('bannerBtnText').value = b.btnText || '¡Lo Quiero!';
+            document.getElementById('bannerBtnAction').value = b.btnAction || 'products';
+            document.getElementById('bannerOrder').value = b.order || 1;
+            document.getElementById('bannerActive').checked = b.active !== false;
+            if(b.image) {
+                currentBannerImage = b.image;
+                document.getElementById('bannerImagePreview').innerHTML = `<img src="${b.image}" alt="Preview">`;
+            }
+        }
+    }
+    showModal('bannerModal');
+}
+
+function handleBannerImage(input) {
+    if(input.files && input.files[0]) {
+        const file = input.files[0];
+        if(file.size > 500000) {
+            showToast('warning', 'Imagen grande', 'La imagen supera 500KB, puede tardar en cargar');
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            currentBannerImage = e.target.result;
+            document.getElementById('bannerImagePreview').innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function handleBannerImageUrl(url) {
+    if(url) {
+        currentBannerImage = url;
+        document.getElementById('bannerImagePreview').innerHTML = `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-exclamation-triangle\\'></i><span>Error al cargar</span>'">`;
+    }
+}
+
+function saveBanner() {
+    const id = document.getElementById('bannerId').value;
+    const banner = {
+        id: id ? parseInt(id) : Date.now(),
+        title: document.getElementById('bannerTitle').value,
+        subtitle: document.getElementById('bannerSubtitle').value,
+        description: document.getElementById('bannerDescription').value,
+        oldPrice: parseFloat(document.getElementById('bannerOldPrice').value) || 0,
+        newPrice: parseFloat(document.getElementById('bannerNewPrice').value) || 0,
+        btnText: document.getElementById('bannerBtnText').value || '¡Lo Quiero!',
+        btnAction: document.getElementById('bannerBtnAction').value,
+        image: currentBannerImage,
+        order: parseInt(document.getElementById('bannerOrder').value) || 1,
+        active: document.getElementById('bannerActive').checked
+    };
+    
+    if(!banner.title) {
+        showToast('error', 'Error', 'El título es requerido');
+        return;
+    }
+    
+    if(id) {
+        const idx = appData.banners.findIndex(b => b.id === parseInt(id));
+        if(idx >= 0) appData.banners[idx] = banner;
+    } else {
+        appData.banners.push(banner);
+    }
+    
+    saveData(); 
+    renderAll();
+    renderSlider();
+    closeModal('bannerModal');
+    showToast('success', 'Guardado', id ? 'Banner actualizado' : 'Banner creado');
+}
+
+function editBanner(id) { showBannerModal(id); }
+
+function deleteBanner(id) {
+    if(confirm('¿Eliminar este banner?')) {
+        appData.banners = appData.banners.filter(b => b.id !== id);
+        saveData(); 
+        renderAll();
+        renderSlider();
+        showToast('success', 'Eliminado', 'Banner eliminado');
+    }
+}
+
+function toggleBanner(id) {
+    const banner = appData.banners.find(b => b.id === id);
+    if(banner) {
+        banner.active = !banner.active;
+        saveData();
+        renderAll();
+        renderSlider();
+    }
+}
+
+function renderBannersAdmin() {
+    const grid = document.getElementById('bannersGrid');
+    if(!grid) return;
+    
+    const banners = appData.banners.sort((a, b) => a.order - b.order);
+    
+    if(banners.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><i class="fas fa-images" style="font-size:48px;color:var(--text-light);margin-bottom:15px;"></i><p>No hay banners creados</p><button class="btn btn-primary" onclick="showBannerModal()"><i class="fas fa-plus"></i> Crear primer banner</button></div>';
+        return;
+    }
+    
+    grid.innerHTML = banners.map((b, idx) => `
+        <div class="banner-card">
+            <div class="banner-preview">
+                ${b.image ? `<img src="${b.image}" alt="${b.title}">` : '<i class="fas fa-image"></i>'}
+                <span class="banner-order">${b.order}</span>
+                <span class="banner-status ${b.active ? 'active' : 'inactive'}">${b.active ? 'Activo' : 'Inactivo'}</span>
+            </div>
+            <div class="banner-info">
+                <div class="banner-title">${b.title}</div>
+                <div class="banner-subtitle">${b.subtitle || 'Sin subtítulo'}</div>
+                ${b.newPrice ? `<div style="color:var(--primary);font-weight:600;">$${formatNumber(b.newPrice)}</div>` : ''}
+                <div class="banner-actions">
+                    <button class="btn btn-outline" onclick="editBanner(${b.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-outline" onclick="toggleBanner(${b.id})"><i class="fas ${b.active ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
+                    <button class="btn btn-danger" onclick="deleteBanner(${b.id})"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderSlider() {
+    const slidesContainer = document.getElementById('promoSlides');
+    const dotsContainer = document.getElementById('promoDots');
+    if(!slidesContainer) return;
+    
+    const activeBanners = (appData.banners || []).filter(b => b.active).sort((a, b) => a.order - b.order);
+    
+    // Si no hay banners personalizados, mostrar los predeterminados
+    if(activeBanners.length === 0) {
+        slidesContainer.innerHTML = `
+            <div class="promo-slide">
+                <div class="promo-content container">
+                    <div class="promo-text">
+                        <span class="promo-badge">Oferta Especial</span>
+                        <h2 class="promo-title">Bienvenido a Ferretería Bruzzone</h2>
+                        <p class="promo-description">Encontrá las mejores herramientas y materiales para tu hogar y obra.</p>
+                        <div class="promo-price"><span class="promo-price-new">¡Los mejores precios!</span></div>
+                        <button class="promo-btn" onclick="scrollToProducts()">Ver Productos</button>
+                    </div>
+                    <div class="promo-image"><i class="fas fa-tools"></i></div>
+                </div>
+            </div>
+        `;
+        if(dotsContainer) dotsContainer.innerHTML = '<span class="promo-dot active"></span>';
+        return;
+    }
+    
+    // Renderizar banners activos
+    slidesContainer.innerHTML = activeBanners.map((b, idx) => `
+        <div class="promo-slide">
+            <div class="promo-content container">
+                <div class="promo-text">
+                    ${b.subtitle ? `<span class="promo-badge">${b.subtitle}</span>` : ''}
+                    <h2 class="promo-title">${b.title}</h2>
+                    ${b.description ? `<p class="promo-description">${b.description}</p>` : ''}
+                    <div class="promo-price">
+                        ${b.oldPrice ? `<span class="promo-price-old">$${formatNumber(b.oldPrice)}</span>` : ''}
+                        ${b.newPrice ? `<span class="promo-price-new">$${formatNumber(b.newPrice)}</span>` : ''}
+                    </div>
+                    <button class="promo-btn" onclick="${getBannerAction(b.btnAction)}">${b.btnText || '¡Lo Quiero!'}</button>
+                </div>
+                <div class="promo-image">
+                    ${b.image ? `<img src="${b.image}" alt="${b.title}">` : '<i class="fas fa-image"></i>'}
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Actualizar dots
+    if(dotsContainer) {
+        dotsContainer.innerHTML = activeBanners.map((b, idx) => 
+            `<span class="promo-dot ${idx === 0 ? 'active' : ''}" onclick="goToSlide(${idx})"></span>`
+        ).join('');
+    }
+    
+    currentSlide = 0;
+    updateSlider();
+}
+
+function getBannerAction(action) {
+    switch(action) {
+        case 'whatsapp': return 'openWhatsApp()';
+        case 'category': return 'scrollToProducts()';
+        default: return 'scrollToProducts()';
     }
 }
 
@@ -2588,7 +2966,155 @@ function adjustStock(id) {
     }
 }
 
-function viewOrder(id) { const o = appData.orders.find(x=>x.id===id); if(o) alert(`Pedido #${o.id}\nCliente: ${o.customer}\nTotal: $${formatNumber(o.total)}\nEstado: ${o.status}`); }
+// ==================== ORDER MANAGEMENT ====================
+let currentOrderId = null;
+
+function viewOrderDetail(id) {
+    const o = appData.orders.find(x => x.id === id);
+    if(!o) return;
+    
+    currentOrderId = id;
+    
+    document.getElementById('orderModalId').textContent = o.id;
+    document.getElementById('orderCustomerName').textContent = o.customer || 'Sin nombre';
+    document.getElementById('orderCustomerPhone').textContent = o.phone || 'Sin teléfono';
+    document.getElementById('orderCustomerEmail').textContent = o.email || 'Sin email';
+    document.getElementById('orderCustomerAddress').textContent = o.address || 'Sin dirección';
+    document.getElementById('orderDate').textContent = o.date || '';
+    document.getElementById('orderPayment').textContent = o.paymentMethod || 'No especificado';
+    document.getElementById('orderPaymentLink').value = o.paymentLink || '';
+    document.getElementById('orderNotes').value = o.notes || '';
+    
+    const statusText = {pending:'Pendiente',processing:'En Proceso',shipped:'Enviado',completed:'Entregado',cancelled:'Cancelado'}[o.status] || 'Pendiente';
+    document.getElementById('orderStatus').textContent = statusText;
+    document.getElementById('orderStatusSelect').value = o.status || 'pending';
+    
+    // Renderizar items
+    const items = o.items || [];
+    document.getElementById('orderItems').innerHTML = items.length ? items.map(item => `
+        <div class="order-item">
+            <div>
+                <div class="order-item-name">${item.name}</div>
+                <div class="order-item-qty">Cantidad: ${item.qty}</div>
+            </div>
+            <div class="order-item-price">$${formatNumber(item.price * item.qty)}</div>
+        </div>
+    `).join('') : '<p style="text-align:center;color:var(--text-light);padding:20px;">Sin productos registrados</p>';
+    
+    document.getElementById('orderTotal').textContent = '$' + formatNumber(o.total);
+    
+    showModal('orderModal');
+}
+
+function viewOrder(id) { viewOrderDetail(id); }
+
+function changeOrderStatus(id) {
+    const o = appData.orders.find(x => x.id === id);
+    if(!o) return;
+    
+    const statuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
+    const statusNames = ['Pendiente', 'En Proceso', 'Enviado', 'Entregado', 'Cancelado'];
+    
+    const currentIndex = statuses.indexOf(o.status);
+    let options = statusNames.map((name, i) => `${i + 1}. ${name}${i === currentIndex ? ' (actual)' : ''}`).join('\n');
+    
+    const choice = prompt(`Cambiar estado del Pedido #${id}\n\n${options}\n\nIngresá el número:`);
+    
+    if(choice && choice >= 1 && choice <= 5) {
+        o.status = statuses[choice - 1];
+        saveData();
+        renderAll();
+        showToast('success', 'Actualizado', `Pedido #${id} ahora está: ${statusNames[choice - 1]}`);
+    }
+}
+
+function updateOrderStatus() {
+    if(!currentOrderId) return;
+    const o = appData.orders.find(x => x.id === currentOrderId);
+    if(o) {
+        const newStatus = document.getElementById('orderStatusSelect').value;
+        const statusText = {pending:'Pendiente',processing:'En Proceso',shipped:'Enviado',completed:'Entregado',cancelled:'Cancelado'}[newStatus];
+        document.getElementById('orderStatus').textContent = statusText;
+    }
+}
+
+function saveOrderChanges() {
+    if(!currentOrderId) return;
+    const o = appData.orders.find(x => x.id === currentOrderId);
+    if(o) {
+        o.status = document.getElementById('orderStatusSelect').value;
+        o.paymentLink = document.getElementById('orderPaymentLink').value;
+        o.notes = document.getElementById('orderNotes').value;
+        saveData();
+        renderAll();
+        closeModal('orderModal');
+        showToast('success', 'Guardado', 'Pedido actualizado correctamente');
+    }
+}
+
+function sendPaymentLink(id) {
+    const o = appData.orders.find(x => x.id === id);
+    if(!o) return;
+    
+    const link = prompt('Ingresá el link de pago (Mercado Pago, transferencia, etc.):', o.paymentLink || '');
+    if(link !== null) {
+        o.paymentLink = link;
+        saveData();
+        
+        if(link && o.phone) {
+            const mensaje = `¡Hola ${o.customer}! 👋\n\nTu pedido #${o.id} está listo.\n\n📦 Total: $${formatNumber(o.total)}\n\n💳 Link de pago:\n${link}\n\n¡Gracias por tu compra!`;
+            const phone = o.phone.replace(/[^0-9]/g, '');
+            const wa = phone.startsWith('54') ? phone : '54' + phone;
+            window.open(`https://wa.me/${wa}?text=${encodeURIComponent(mensaje)}`, '_blank');
+        } else if(link) {
+            showToast('success', 'Link guardado', 'Link de pago actualizado');
+        }
+    }
+}
+
+function sendPaymentLinkFromModal() {
+    if(!currentOrderId) return;
+    const o = appData.orders.find(x => x.id === currentOrderId);
+    const link = document.getElementById('orderPaymentLink').value;
+    
+    if(!link) {
+        showToast('error', 'Error', 'Ingresá un link de pago');
+        return;
+    }
+    
+    if(!o.phone) {
+        showToast('error', 'Error', 'El cliente no tiene teléfono registrado');
+        return;
+    }
+    
+    o.paymentLink = link;
+    saveData();
+    
+    const mensaje = `¡Hola ${o.customer}! 👋\n\nTu pedido #${o.id} está listo.\n\n📦 Total: $${formatNumber(o.total)}\n\n💳 Link de pago:\n${link}\n\n¡Gracias por tu compra!`;
+    const phone = o.phone.replace(/[^0-9]/g, '');
+    const wa = phone.startsWith('54') ? phone : '54' + phone;
+    window.open(`https://wa.me/${wa}?text=${encodeURIComponent(mensaje)}`, '_blank');
+}
+
+function contactCustomerOrder(id) {
+    const o = appData.orders.find(x => x.id === id);
+    if(!o || !o.phone) {
+        showToast('error', 'Error', 'El cliente no tiene teléfono registrado');
+        return;
+    }
+    
+    const statusText = {pending:'pendiente',processing:'en proceso',shipped:'enviado',completed:'entregado',cancelled:'cancelado'}[o.status] || 'pendiente';
+    const mensaje = `¡Hola ${o.customer}! 👋\n\nTe escribimos de ${window.companyName || 'la ferretería'} por tu pedido #${o.id}.\n\nEstado: ${statusText}\nTotal: $${formatNumber(o.total)}\n\n¿En qué podemos ayudarte?`;
+    
+    const phone = o.phone.replace(/[^0-9]/g, '');
+    const wa = phone.startsWith('54') ? phone : '54' + phone;
+    window.open(`https://wa.me/${wa}?text=${encodeURIComponent(mensaje)}`, '_blank');
+}
+
+function contactCustomerFromModal() {
+    if(currentOrderId) contactCustomerOrder(currentOrderId);
+}
+
 function editCustomer(id) { showToast('info','Info','Función en desarrollo'); }
 function showCustomerModal() { showToast('info','Info','Función en desarrollo'); }
 function editShipping(id) { showToast('info','Info','Función en desarrollo'); }
