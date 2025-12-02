@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FerreCloud - Tu Ferretería Online</title>
+    <title>Ferretería Bruzzone - Tu Ferretería Online</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDK -->
@@ -12,9 +12,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <style>
         :root {
-            --primary: #FF6B35;
-            --primary-dark: #E55A2B;
-            --primary-light: #FF8A5B;
+            --primary: #2A7AB8;
+            --primary-dark: #1E5F8F;
+            --primary-light: #4A9AD4;
             --secondary: #1A1A2E;
             --secondary-light: #25253D;
             --accent: #00D4AA;
@@ -119,6 +119,8 @@
         .logo-icon i { font-size: 24px; }
         .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
         .logo-text span { color: var(--primary); }
+        .logo-img { height: 50px; width: auto; object-fit: contain; }
+        .logo-img-admin { height: 40px; width: auto; object-fit: contain; filter: brightness(0) invert(1); }
         
         .search-box { flex: 1; max-width: 500px; position: relative; min-width: 200px; }
         .search-box input { width: 100%; padding: 14px 50px 14px 20px; border: none; border-radius: 50px; font-size: 15px; background: rgba(255,255,255,0.1); color: white; transition: 0.3s; }
@@ -446,6 +448,7 @@
             .header-btn span { display: none; }
             .header-btn { padding: 10px; min-width: 44px; }
             .logo-text { font-size: 20px; }
+            .logo-img { height: 40px; }
             .footer-grid { grid-template-columns: 1fr; }
             .form-grid { grid-template-columns: 1fr; }
             .nav-list { flex-wrap: wrap; justify-content: center; gap: 5px; }
@@ -523,7 +526,7 @@
     <div class="loader-overlay" id="loader">
         <div style="text-align: center;">
             <div class="loader-icon"><i class="fas fa-tools"></i></div>
-            <p class="loader-text">Cargando FerreCloud...</p>
+            <p class="loader-text">Cargando Ferretería Bruzzone...</p>
         </div>
     </div>
 
@@ -533,15 +536,14 @@
         <header class="store-header">
             <div class="header-top">
                 <div class="container">
-                    <div><a href="tel:+543584123456"><i class="fas fa-phone"></i> (358) 412-3456</a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#5224373c263321123437202037313e3d27367c313d3f"><i class="fas fa-envelope"></i> <span class="__cf_email__" data-cfemail="88feede6fce9fbc8eeedfafaedebe4e7fdeca6ebe7e5">[email&#160;protected]</span></a></div>
-                    <div><i class="fas fa-truck"></i> Envío gratis en compras +$50.000</div>
+                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#d1" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText"><span class="__cf_email__" data-cfemail="07716269736674476162757562646b6872632964686a">[email&#160;protected]</span></span></a></div>
+                    <div><i class="fas fa-truck"></i> Envío gratis en compras +$<span id="headerFreeShipping">50.000</span></div>
                 </div>
             </div>
             <div class="header-main">
                 <div class="container">
                     <a href="#" class="logo" onclick="showStore()">
-                        <div class="logo-icon"><i class="fas fa-tools"></i></div>
-                        <span class="logo-text">Ferre<span>Cloud</span></span>
+                        <img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img">
                     </a>
                     <div class="search-box">
                         <input type="text" placeholder="Buscar productos..." id="searchInput" onkeyup="searchProducts()">
@@ -702,7 +704,7 @@
             <div class="container">
                 <div class="footer-grid">
                     <div class="footer-about">
-                        <a href="#" class="logo"><div class="logo-icon"><i class="fas fa-tools"></i></div><span class="logo-text">Ferre<span>Cloud</span></span></a>
+                        <a href="#" class="logo"><img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img"></a>
                         <p>Tu ferretería de confianza con más de 10 años de experiencia. Todo lo que necesitas para tu hogar y obra en un solo lugar.</p>
                         <div class="social-links">
                             <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
@@ -712,10 +714,10 @@
                     </div>
                     <div><h4 class="footer-title">Enlaces</h4><ul class="footer-links"><li><a href="#">Inicio</a></li><li><a href="#">Productos</a></li><li><a href="#">Ofertas</a></li><li><a href="#">Contacto</a></li></ul></div>
                     <div><h4 class="footer-title">Categorías</h4><ul class="footer-links" id="footerCategories"></ul></div>
-                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links"><li><i class="fas fa-map-marker-alt"></i> Dr. Carlos Rocha 128</li><li><i class="fas fa-phone"></i> (358) 412-3456</li><li><i class="fas fa-envelope"></i> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8cfae9e2f8edffcceae9fefee9efe0e3f9e8a2efe3e1">[email&#160;protected]</a></li></ul></div>
+                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="196f7c776d786a597f7c6b6b7c7a75766c7d377a7674">[email&#160;protected]</a></span></li></ul></div>
                 </div>
                 <div class="footer-bottom">
-                    <p>&copy; 2025 FerreCloud. Todos los derechos reservados.</p>
+                    <p>&copy; 2025 <span id="footerCompanyName">FerreCloud</span>. Todos los derechos reservados.</p>
                     <div class="payment-methods"><i class="fab fa-cc-visa"></i><i class="fab fa-cc-mastercard"></i><i class="fab fa-cc-amex"></i><i class="fas fa-money-bill-wave"></i></div>
                 </div>
             </div>
@@ -741,7 +743,7 @@
     <div class="admin-container" id="adminView">
         <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
         <aside class="admin-sidebar">
-            <div class="admin-logo"><a href="#" class="logo" onclick="showStore()"><div class="logo-icon"><i class="fas fa-tools"></i></div><span class="logo-text">Ferre<span>Cloud</span></span></a><span class="admin-badge">ADMIN</span></div>
+            <div class="admin-logo"><a href="#" class="logo" onclick="showStore()"><img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img-admin"></a><span class="admin-badge">ADMIN</span></div>
             <nav class="admin-menu">
                 <div class="menu-section">
                     <div class="menu-title">Principal</div>
@@ -1116,7 +1118,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ==================== FIREBASE CONFIG ====================
 // Configuración de Firebase - Proyecto FerreCloud
 const firebaseConfig = {
@@ -2093,6 +2095,8 @@ function saveCompanyData(e) {
 
 function loadCompanyData() {
     const c = appData.company || {};
+    
+    // Formulario admin
     document.getElementById('companyName').value = c.name || 'FerreCloud';
     document.getElementById('companyCuit').value = c.cuit || '';
     document.getElementById('companyAddress').value = c.address || '';
@@ -2103,6 +2107,23 @@ function loadCompanyData() {
     document.getElementById('companyDescription').value = c.description || '';
     document.getElementById('companyHours').value = c.hours || '';
     document.getElementById('companyFreeShipping').value = c.freeShipping || 50000;
+    
+    // Actualizar Header
+    const phone = c.phone || '(358) 412-3456';
+    const email = c.email || 'ventas@ferrecloud.com';
+    const freeShipping = c.freeShipping || 50000;
+    
+    document.getElementById('headerPhoneText').textContent = phone;
+    document.getElementById('headerPhone').href = 'tel:' + phone.replace(/[^0-9+]/g, '');
+    document.getElementById('headerEmailText').textContent = email;
+    document.getElementById('headerEmail').href = 'mailto:' + email;
+    document.getElementById('headerFreeShipping').textContent = freeShipping.toLocaleString('es-AR');
+    
+    // Actualizar Footer
+    document.getElementById('footerAddress').textContent = c.address || 'Dr. Carlos Rocha 128';
+    document.getElementById('footerPhone').textContent = phone;
+    document.getElementById('footerEmail').textContent = email;
+    document.getElementById('footerCompanyName').textContent = c.name || 'FerreCloud';
 }
 
 function savePaymentSettings(e) { e.preventDefault(); showToast('success','Guardado','Pagos configurados'); }
@@ -2272,14 +2293,4 @@ document.addEventListener('DOMContentLoaded', function() {
         if(savedConfig) {
             const cfg = JSON.parse(savedConfig);
             if(document.getElementById('fbApiKey')) {
-                document.getElementById('fbApiKey').value = cfg.apiKey || '';
-                document.getElementById('fbProjectId').value = cfg.projectId || '';
-                document.getElementById('fbAuthDomain').value = cfg.authDomain || '';
-                document.getElementById('fbStorageBucket').value = cfg.storageBucket || '';
-            }
-        }
-    }, 2000);
-});
-    </script>
-</body>
-</html>
+                document.getElementById('fbApiKey').value = cf
