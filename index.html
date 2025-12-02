@@ -543,7 +543,8 @@
             <div class="header-main">
                 <div class="container">
                     <a href="#" class="logo" onclick="showStore()">
-                        <img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img">
+                        <img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <span class="logo-text" style="display:none;">Ferretería <span>Bruzzone</span></span>
                     </a>
                     <div class="search-box">
                         <input type="text" placeholder="Buscar productos..." id="searchInput" onkeyup="searchProducts()">
@@ -704,7 +705,7 @@
             <div class="container">
                 <div class="footer-grid">
                     <div class="footer-about">
-                        <a href="#" class="logo"><img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img"></a>
+                        <a href="#" class="logo"><img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span class="logo-text" style="display:none;">Ferretería <span>Bruzzone</span></span></a>
                         <p>Tu ferretería de confianza con más de 10 años de experiencia. Todo lo que necesitas para tu hogar y obra en un solo lugar.</p>
                         <div class="social-links">
                             <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
@@ -743,7 +744,7 @@
     <div class="admin-container" id="adminView">
         <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
         <aside class="admin-sidebar">
-            <div class="admin-logo"><a href="#" class="logo" onclick="showStore()"><img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img-admin"></a><span class="admin-badge">ADMIN</span></div>
+            <div class="admin-logo"><a href="#" class="logo" onclick="showStore()"><img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img-admin" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span class="logo-text" style="display:none;">Ferretería <span>Bruzzone</span></span></a><span class="admin-badge">ADMIN</span></div>
             <nav class="admin-menu">
                 <div class="menu-section">
                     <div class="menu-title">Principal</div>
@@ -2293,4 +2294,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if(savedConfig) {
             const cfg = JSON.parse(savedConfig);
             if(document.getElementById('fbApiKey')) {
-                document.getElementById('fbApiKey').value = cf
+                document.getElementById('fbApiKey').value = cfg.apiKey || '';
+                document.getElementById('fbProjectId').value = cfg.projectId || '';
+                document.getElementById('fbAuthDomain').value = cfg.authDomain || '';
+                document.getElementById('fbStorageBucket').value = cfg.storageBucket || '';
+            }
+        }
+    }, 2000);
+});
+    </script>
+</body>
+</html>
