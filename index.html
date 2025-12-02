@@ -818,6 +818,7 @@
                     <a class="menu-item" onclick="showAdminSection('payments', this)"><i class="fas fa-credit-card"></i><span>Pagos</span></a>
                     <a class="menu-item" onclick="showAdminSection('wyndes', this)"><i class="fas fa-sync-alt"></i><span>Sync Wyndes</span></a>
                     <a class="menu-item" onclick="showAdminSection('firebase', this)"><i class="fas fa-cloud"></i><span>Firebase</span></a>
+                    <a class="menu-item" onclick="showAdminSection('security', this)"><i class="fas fa-lock"></i><span>Seguridad</span></a>
                 </div>
             </nav>
         </aside>
@@ -1033,6 +1034,49 @@
                                 Si ya tenés datos guardados localmente, podés subirlos a Firebase con un clic.
                             </p>
                             <button class="btn btn-secondary" onclick="migrateToFirebase()"><i class="fas fa-cloud-upload-alt"></i> Subir Datos a Firebase</button>
+                        </div>
+                    </div>
+                </section>
+                <!-- Security -->
+                <section class="admin-section" id="section-security">
+                    <div class="admin-card">
+                        <div class="card-header"><h3 class="card-title"><i class="fas fa-lock"></i> Seguridad - Cambiar Credenciales</h3></div>
+                        <div class="card-body">
+                            <div class="alert" style="background:#FEF3C7;border-left:4px solid #F59E0B;padding:15px;border-radius:8px;margin-bottom:20px;">
+                                <strong><i class="fas fa-exclamation-triangle"></i> Importante</strong><br>
+                                Guardá bien tu usuario y contraseña. Si los olvidás, tendrás que editar el archivo index.html para recuperarlos.
+                            </div>
+                            
+                            <div style="background:var(--bg-main);padding:20px;border-radius:var(--radius);margin-bottom:25px;">
+                                <h4 style="margin-bottom:10px;"><i class="fas fa-user-shield"></i> Credenciales Actuales</h4>
+                                <p><strong>Usuario:</strong> <span id="currentAdminUser">admin</span></p>
+                                <p><strong>Contraseña:</strong> ••••••••</p>
+                            </div>
+
+                            <form id="securityForm" onsubmit="changeAdminCredentials(event)">
+                                <h4 style="margin-bottom:15px;"><i class="fas fa-key"></i> Cambiar Credenciales</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Contraseña Actual *</label>
+                                        <input type="password" class="form-input" id="currentPassword" required placeholder="Ingresá tu contraseña actual">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Nuevo Usuario</label>
+                                        <input type="text" class="form-input" id="newUsername" placeholder="Dejar vacío para mantener">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Nueva Contraseña</label>
+                                        <input type="password" class="form-input" id="newPassword" placeholder="Mínimo 6 caracteres">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Confirmar Nueva Contraseña</label>
+                                        <input type="password" class="form-input" id="confirmPassword" placeholder="Repetir contraseña">
+                                    </div>
+                                </div>
+                                <div class="btn-group" style="margin-top:20px;">
+                                    <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save"></i> Guardar Cambios</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </section>
@@ -1305,11 +1349,22 @@ let db = null;
 let firebaseEnabled = false;
 let isAdmin = false;
 
-// Credenciales admin (cambiar en producción)
-const ADMIN_CREDENTIALS = {
+// Credenciales admin (se cargan desde localStorage/Firebase)
+let ADMIN_CREDENTIALS = {
     user: 'admin',
     pass: 'ferrecloud2024'
 };
+
+// Cargar credenciales guardadas
+function loadAdminCredentials() {
+    const saved = localStorage.getItem('ferrecloud_admin_credentials');
+    if(saved) {
+        try {
+            ADMIN_CREDENTIALS = JSON.parse(saved);
+        } catch(e) {}
+    }
+}
+loadAdminCredentials();
 
 // ==================== DATA STORE ====================
 let appData = {
@@ -1411,6 +1466,60 @@ function adminLogout() {
     isAdmin = false;
     showStore();
     showToast('success', 'Sesión cerrada', 'Cerraste sesión del panel admin');
+}
+
+// ==================== SECURITY ====================
+function changeAdminCredentials(e) {
+    e.preventDefault();
+    
+    const currentPass = document.getElementById('currentPassword').value;
+    const newUser = document.getElementById('newUsername').value.trim();
+    const newPass = document.getElementById('newPassword').value;
+    const confirmPass = document.getElementById('confirmPassword').value;
+    
+    // Validar contraseña actual
+    if(currentPass !== ADMIN_CREDENTIALS.pass) {
+        showToast('error', 'Error', 'La contraseña actual es incorrecta');
+        return;
+    }
+    
+    // Validar que haya algo que cambiar
+    if(!newUser && !newPass) {
+        showToast('error', 'Error', 'Ingresá un nuevo usuario o contraseña');
+        return;
+    }
+    
+    // Validar nueva contraseña
+    if(newPass) {
+        if(newPass.length < 6) {
+            showToast('error', 'Error', 'La contraseña debe tener al menos 6 caracteres');
+            return;
+        }
+        if(newPass !== confirmPass) {
+            showToast('error', 'Error', 'Las contraseñas no coinciden');
+            return;
+        }
+    }
+    
+    // Actualizar credenciales
+    if(newUser) ADMIN_CREDENTIALS.user = newUser;
+    if(newPass) ADMIN_CREDENTIALS.pass = newPass;
+    
+    // Guardar en localStorage
+    localStorage.setItem('ferrecloud_admin_credentials', JSON.stringify(ADMIN_CREDENTIALS));
+    
+    // Actualizar UI
+    document.getElementById('currentAdminUser').textContent = ADMIN_CREDENTIALS.user;
+    
+    // Limpiar formulario
+    document.getElementById('securityForm').reset();
+    
+    showToast('success', 'Guardado', 'Credenciales actualizadas correctamente');
+}
+
+function loadSecurityPanel() {
+    const el = document.getElementById('currentAdminUser');
+    if(el) el.textContent = ADMIN_CREDENTIALS.user;
 }
 
 // ==================== FIREBASE FUNCTIONS ====================
@@ -1666,6 +1775,7 @@ function renderAll() {
     updateStats();
     updateCartUI();
     loadCompanyData();
+    loadSecurityPanel();
 }
 
 function updateCategoryProductCounts() {
@@ -1831,7 +1941,7 @@ function showAdminSection(section, el) {
     if(el) el.classList.add('active');
     document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
     document.getElementById('section-'+section).classList.add('active');
-    const titles = {dashboard:'Dashboard',products:'Productos',categories:'Categorías',banners:'Banners',orders:'Pedidos',customers:'Clientes',inventory:'Inventario',coupons:'Cupones',company:'Datos Empresa',shipping:'Envíos',payments:'Pagos',wyndes:'Sync Wyndes',firebase:'Firebase'};
+    const titles = {dashboard:'Dashboard',products:'Productos',categories:'Categorías',banners:'Banners',orders:'Pedidos',customers:'Clientes',inventory:'Inventario',coupons:'Cupones',company:'Datos Empresa',shipping:'Envíos',payments:'Pagos',wyndes:'Sync Wyndes',firebase:'Firebase',security:'Seguridad'};
     document.getElementById('adminPageTitle').textContent = titles[section]||section;
     closeMobileMenu(); // Cerrar menú en móvil al seleccionar sección
 }
