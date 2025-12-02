@@ -1063,12 +1063,16 @@
     </div>
 
     <div class="modal-overlay" id="importModal">
-        <div class="modal" style="max-width: 500px;">
+        <div class="modal" style="max-width: 550px;">
             <div class="modal-header"><h3 class="modal-title">Importar Productos</h3><button class="modal-close" onclick="closeModal('importModal')"><i class="fas fa-times"></i></button></div>
             <div class="modal-body">
-                <div class="alert alert-info"><i class="fas fa-info-circle"></i><span>Excel (.xlsx) con: Código, Nombre, Categoría, Precio, Stock</span></div>
-                <div class="image-upload" onclick="document.getElementById('importFile').click()"><i class="fas fa-file-excel"></i><p>Arrastra o <span>selecciona</span> archivo</p><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleImportFile(this)"></div>
-                <div id="importPreview" style="margin-top: 20px; display: none;"><p><strong>Archivo:</strong> <span id="importFileName"></span></p></div>
+                <div class="alert alert-info"><i class="fas fa-info-circle"></i><span>Soporta: CSV de Tienda Nube, Excel (.xlsx) o JSON</span></div>
+                <div class="image-upload" onclick="document.getElementById('importFile').click()"><i class="fas fa-file-import"></i><p>Arrastra o <span>selecciona</span> archivo</p><input type="file" id="importFile" accept=".xlsx,.xls,.csv,.json" style="display:none;" onchange="handleImportFile(this)"></div>
+                <div id="importPreview" style="margin-top: 20px; display: none;">
+                    <p><strong>Archivo:</strong> <span id="importFileName"></span></p>
+                    <p><strong>Productos encontrados:</strong> <span id="importCount">0</span></p>
+                    <p><strong>Categorías:</strong> <span id="importCategories">0</span></p>
+                </div>
             </div>
             <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('importModal')">Cancelar</button><button class="btn btn-primary" onclick="processImport()" id="importBtn" disabled><i class="fas fa-upload"></i> Importar</button></div>
         </div>
@@ -2046,20 +2050,207 @@ function showImportModal() {
     document.getElementById('importPreview').style.display = 'none';
     document.getElementById('importBtn').disabled = true;
     document.getElementById('importFile').value = '';
+    window.pendingImport = null;
     showModal('importModal');
 }
 
+let pendingImport = null;
+
 function handleImportFile(input) {
-    if(input.files.length>0) {
-        document.getElementById('importFileName').textContent = input.files[0].name;
-        document.getElementById('importPreview').style.display = 'block';
-        document.getElementById('importBtn').disabled = false;
+    if(input.files.length === 0) return;
+    
+    const file = input.files[0];
+    const fileName = file.name.toLowerCase();
+    document.getElementById('importFileName').textContent = file.name;
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            let data;
+            
+            if(fileName.endsWith('.json')) {
+                // Importar JSON
+                data = JSON.parse(e.target.result);
+                if(data.products) {
+                    pendingImport = data;
+                } else if(Array.isArray(data)) {
+                    pendingImport = { products: data, categories: [] };
+                }
+            } else if(fileName.endsWith('.csv')) {
+                // Importar CSV de Tienda Nube
+                data = parseCSVTiendaNube(e.target.result);
+                pendingImport = data;
+            }
+            
+            if(pendingImport && pendingImport.products) {
+                document.getElementById('importCount').textContent = pendingImport.products.length;
+                document.getElementById('importCategories').textContent = pendingImport.categories ? pendingImport.categories.length : 'N/A';
+                document.getElementById('importPreview').style.display = 'block';
+                document.getElementById('importBtn').disabled = false;
+            } else {
+                showToast('error', 'Error', 'Formato de archivo no válido');
+            }
+        } catch(err) {
+            console.error('Error parsing file:', err);
+            showToast('error', 'Error', 'No se pudo leer el archivo: ' + err.message);
+        }
+    };
+    
+    reader.readAsText(file, 'ISO-8859-1'); // Encoding común en Tienda Nube
+}
+
+function parseCSVTiendaNube(csvText) {
+    const lines = csvText.split('\n');
+    if(lines.length < 2) return { products: [], categories: [] };
+    
+    // Detectar delimitador (punto y coma o coma)
+    const delimiter = lines[0].includes(';') ? ';' : ',';
+    
+    // Parsear header
+    const headers = parseCSVLine(lines[0], delimiter);
+    
+    const products = [];
+    const categoriesSet = new Set();
+    const seenNames = new Set();
+    
+    for(let i = 1; i < lines.length; i++) {
+        if(!lines[i].trim()) continue;
+        
+        const values = parseCSVLine(lines[i], delimiter);
+        const row = {};
+        headers.forEach((h, idx) => {
+            row[h.trim().replace(/"/g, '')] = (values[idx] || '').replace(/^"|"$/g, '');
+        });
+        
+        const nombre = row['Nombre'] || row['nombre'] || '';
+        if(!nombre || seenNames.has(nombre)) continue;
+        seenNames.add(nombre);
+        
+        // Parsear precio
+        let precio = row['Precio promocional'] || row['Precio'] || '0';
+        precio = parseFloat(precio.replace(/[,.]/g, m => m === ',' ? '' : '.')) || 0;
+        
+        let precioOriginal = row['Precio'] || '0';
+        precioOriginal = parseFloat(precioOriginal.replace(/[,.]/g, m => m === ',' ? '' : '.')) || 0;
+        
+        // Categoría
+        const categorias = row['Categorías'] || row['Categoria'] || 'General';
+        const categoria = categorias.split(',')[0].trim();
+        categoriesSet.add(categoria);
+        
+        // Stock
+        const stock = parseInt(row['Stock']) || 10;
+        
+        // SKU
+        const sku = row['SKU'] || row['Código'] || `PROD-${String(products.length + 1).padStart(4, '0')}`;
+        
+        // Descripción (limpiar HTML)
+        let descripcion = row['Descripción'] || row['Descripcion'] || '';
+        descripcion = descripcion.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 500);
+        
+        // Activo
+        const activo = (row['Mostrar en tienda'] || 'SI').toUpperCase() === 'SI';
+        
+        // Marca
+        const marca = row['Marca'] || '';
+        
+        products.push({
+            id: products.length + 1,
+            code: sku,
+            name: nombre,
+            category: categoria,
+            price: precio || precioOriginal,
+            originalPrice: (row['Precio promocional'] && precioOriginal > precio) ? precioOriginal : 0,
+            stock: stock,
+            minStock: 5,
+            description: descripcion || nombre + ' - Producto de calidad',
+            brand: marca,
+            active: activo,
+            featured: products.length < 20,
+            image: ''
+        });
     }
+    
+    // Crear categorías
+    const categoryIcons = {
+        'hogar': 'fa-home', 'herramienta': 'fa-hammer', 'electric': 'fa-bolt',
+        'pintura': 'fa-paint-roller', 'plomer': 'fa-faucet', 'jardin': 'fa-leaf',
+        'ferret': 'fa-tools', 'construc': 'fa-hard-hat', 'iluminac': 'fa-lightbulb',
+        'luz': 'fa-lightbulb', 'seguridad': 'fa-lock', 'auto': 'fa-car',
+        'limpieza': 'fa-broom', 'bateria': 'fa-battery-full', 'temporada': 'fa-calendar'
+    };
+    
+    const categories = Array.from(categoriesSet).map((name, idx) => {
+        let icon = 'fa-box';
+        for(const [key, val] of Object.entries(categoryIcons)) {
+            if(name.toLowerCase().includes(key)) { icon = val; break; }
+        }
+        return {
+            id: idx + 1,
+            name: name,
+            icon: icon,
+            active: true,
+            productCount: products.filter(p => p.category === name).length
+        };
+    });
+    
+    return { products, categories };
+}
+
+function parseCSVLine(line, delimiter) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for(let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if(char === '"') {
+            inQuotes = !inQuotes;
+        } else if(char === delimiter && !inQuotes) {
+            result.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current);
+    return result;
 }
 
 function processImport() {
-    showToast('success','Importando','Productos importándose...');
+    if(!pendingImport || !pendingImport.products || pendingImport.products.length === 0) {
+        showToast('error', 'Error', 'No hay productos para importar');
+        return;
+    }
+    
+    const confirmMsg = `¿Importar ${pendingImport.products.length} productos?\n\nEsto REEMPLAZARÁ todos los productos actuales.`;
+    if(!confirm(confirmMsg)) return;
+    
+    // Reasignar IDs
+    const maxId = Math.max(0, ...appData.products.map(p => p.id));
+    pendingImport.products.forEach((p, i) => {
+        p.id = maxId + i + 1;
+    });
+    
+    // Reemplazar productos
+    appData.products = pendingImport.products;
+    
+    // Importar categorías si existen
+    if(pendingImport.categories && pendingImport.categories.length > 0) {
+        const maxCatId = Math.max(0, ...appData.categories.map(c => c.id));
+        pendingImport.categories.forEach((c, i) => {
+            c.id = maxCatId + i + 1;
+        });
+        appData.categories = pendingImport.categories;
+    }
+    
+    saveData();
+    renderAll();
     closeModal('importModal');
+    
+    showToast('success', '¡Importado!', `${pendingImport.products.length} productos importados correctamente`);
+    pendingImport = null;
 }
 
 function showAuthModal() { showModal('authModal'); }
