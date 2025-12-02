@@ -196,7 +196,7 @@
         
         /* Products */
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .product-card { background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden; transition: 0.3s; position: relative; }
+        .product-card { background: #FFFFFF; border-radius: var(--radius-lg); overflow: hidden; transition: 0.3s; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .product-badge { position: absolute; top: 15px; left: 15px; padding: 5px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; z-index: 10; }
         .badge-sale { background: var(--danger); color: white; }
@@ -206,9 +206,9 @@
         .product-card:hover .product-actions { opacity: 1; transform: translateX(0); }
         .product-action-btn { width: 40px; height: 40px; background: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: 0.3s; }
         .product-action-btn:hover { background: var(--primary); color: white; }
-        .product-image { height: 200px; background: linear-gradient(135deg, #f0f0f0, #e0e0e0); display: flex; align-items: center; justify-content: center; }
+        .product-image { height: 200px; background: #FAFAFA; display: flex; align-items: center; justify-content: center; }
         .product-image i { font-size: 60px; color: var(--text-light); }
-        .product-info { padding: 20px; }
+        .product-info { padding: 20px; background: #FFFFFF; }
         .product-category { font-size: 12px; color: var(--primary); font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
         .product-name { font-weight: 600; font-size: 16px; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .product-rating { display: flex; align-items: center; gap: 5px; margin-bottom: 12px; }
@@ -222,6 +222,8 @@
         .add-cart-btn:hover { background: var(--primary-dark); }
         .whatsapp-product-btn { padding: 12px 14px; background: #25D366; color: white; border: none; border-radius: var(--radius); cursor: pointer; transition: 0.3s; font-size: 16px; }
         .whatsapp-product-btn:hover { background: #128C7E; }
+        .share-product-btn { padding: 12px 14px; background: #6366F1; color: white; border: none; border-radius: var(--radius); cursor: pointer; transition: 0.3s; font-size: 16px; }
+        .share-product-btn:hover { background: #4F46E5; }
         .buy-now-btn { padding: 12px 20px; background: var(--secondary); color: white; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: 0.3s; }
         .buy-now-btn:hover { background: var(--secondary-light); }
         
@@ -501,7 +503,9 @@
             .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             .product-card { padding: 10px; }
             .product-name { font-size: 14px; }
-            .product-footer { flex-direction: column; gap: 8px; }
+            .product-footer { flex-wrap: wrap; gap: 8px; }
+            .product-footer .add-cart-btn { flex: 1 1 100%; }
+            .product-footer .whatsapp-product-btn, .product-footer .share-product-btn { flex: 1; }
             .add-cart-btn, .buy-now-btn { width: 100%; justify-content: center; }
             .categories-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .category-card { padding: 15px 10px; }
@@ -1831,8 +1835,8 @@ function renderProducts(products = null) {
                     <div class="product-price">${price}</div>
                     <div class="product-footer">
                         <button class="add-cart-btn" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> Agregar</button>
-                        <button class="buy-now-btn" onclick="buyNow(${p.id})">Comprar</button>
                         <button class="whatsapp-product-btn" onclick="openWhatsApp('${p.name.replace(/'/g, "\\'")}')"><i class="fab fa-whatsapp"></i></button>
+                        <button class="share-product-btn" onclick="shareProduct(${p.id})" title="Compartir"><i class="fas fa-share-alt"></i></button>
                     </div>
                 </div>
             </div>
@@ -2053,6 +2057,100 @@ function toggleCart() {
 }
 
 function buyNow(id) { addToCart(id); toggleCart(); }
+
+function shareProduct(id) {
+    const p = appData.products.find(x => x.id === id);
+    if(!p) return;
+    
+    const companyName = window.companyName || 'Ferretería Bruzzone';
+    const price = p.salePrice || p.price;
+    const currentUrl = window.location.href.split('?')[0];
+    const productUrl = `${currentUrl}?producto=${id}`;
+    
+    const shareText = `🔧 ${p.name}\n💰 $${formatNumber(price)}\n\n${companyName}`;
+    
+    // Mostrar opciones de compartir
+    const options = `
+        <div style="display:flex;flex-direction:column;gap:15px;padding:10px;">
+            <button onclick="shareViaWhatsApp(${id})" style="padding:15px;background:#25D366;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+                <i class="fab fa-whatsapp" style="font-size:20px;"></i> Compartir por WhatsApp
+            </button>
+            <button onclick="shareViaFacebook(${id})" style="padding:15px;background:#1877F2;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+                <i class="fab fa-facebook-f" style="font-size:20px;"></i> Compartir en Facebook
+            </button>
+            <button onclick="copyProductLink(${id})" style="padding:15px;background:var(--secondary);color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+                <i class="fas fa-link" style="font-size:20px;"></i> Copiar enlace
+            </button>
+        </div>
+    `;
+    
+    // Crear modal de compartir
+    const modal = document.createElement('div');
+    modal.id = 'shareModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    modal.innerHTML = `
+        <div style="background:white;border-radius:15px;padding:25px;max-width:350px;width:90%;text-align:center;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="margin:0;font-size:18px;">Compartir Producto</h3>
+                <button onclick="document.getElementById('shareModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);">×</button>
+            </div>
+            <p style="color:var(--text-secondary);margin-bottom:15px;font-size:14px;">${p.name}</p>
+            ${options}
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Cerrar al hacer clic fuera
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) modal.remove();
+    });
+}
+
+function shareViaWhatsApp(id) {
+    const p = appData.products.find(x => x.id === id);
+    if(!p) return;
+    
+    const companyName = window.companyName || 'Ferretería Bruzzone';
+    const price = p.salePrice || p.price;
+    const currentUrl = window.location.href.split('?')[0];
+    
+    const mensaje = `🔧 *${p.name}*\n💰 Precio: $${formatNumber(price)}\n\n📍 ${companyName}\n🔗 ${currentUrl}`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
+    document.getElementById('shareModal')?.remove();
+}
+
+function shareViaFacebook(id) {
+    const currentUrl = window.location.href.split('?')[0];
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, '_blank', 'width=600,height=400');
+    document.getElementById('shareModal')?.remove();
+}
+
+function copyProductLink(id) {
+    const p = appData.products.find(x => x.id === id);
+    if(!p) return;
+    
+    const companyName = window.companyName || 'Ferretería Bruzzone';
+    const price = p.salePrice || p.price;
+    const currentUrl = window.location.href.split('?')[0];
+    
+    const texto = `${p.name} - $${formatNumber(price)} | ${companyName} - ${currentUrl}`;
+    
+    navigator.clipboard.writeText(texto).then(() => {
+        showToast('success', 'Copiado', 'Enlace copiado al portapapeles');
+        document.getElementById('shareModal')?.remove();
+    }).catch(() => {
+        // Fallback para navegadores viejos
+        const input = document.createElement('input');
+        input.value = texto;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('success', 'Copiado', 'Enlace copiado al portapapeles');
+        document.getElementById('shareModal')?.remove();
+    });
+}
 
 function proceedToCheckout() {
     if(appData.cart.length === 0) { showToast('error','Carrito vacío','Agregá productos para continuar'); return; }
