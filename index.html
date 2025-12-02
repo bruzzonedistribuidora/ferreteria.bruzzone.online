@@ -581,7 +581,7 @@
         <header class="store-header">
             <div class="header-top">
                 <div class="container">
-                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#95" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText"><span class="__cf_email__" data-cfemail="daacbfb4aebba99abcbfa8a8bfb9b6b5afbef4b9b5b7">[email&#160;protected]</span></span></a></div>
+                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="mailto:" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText">ventas@ferrecloud.com</span></a></div>
                     <div><i class="fas fa-truck"></i> Envío gratis en compras +$<span id="headerFreeShipping">50.000</span></div>
                 </div>
             </div>
@@ -760,7 +760,7 @@
                     </div>
                     <div><h4 class="footer-title">Enlaces</h4><ul class="footer-links"><li><a href="#">Inicio</a></li><li><a href="#">Productos</a></li><li><a href="#">Ofertas</a></li><li><a href="#">Contacto</a></li></ul></div>
                     <div><h4 class="footer-title">Categorías</h4><ul class="footer-links" id="footerCategories"></ul></div>
-                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="691f0c071d081a290f0c1b1b0c0a05061c0d470a0604">[email&#160;protected]</a></span></li></ul></div>
+                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail">ventas@ferrecloud.com</span></li></ul></div>
                 </div>
                 <div class="footer-bottom">
                     <p>&copy; 2025 <span id="footerCompanyName">FerreCloud</span>. Todos los derechos reservados.</p>
@@ -1335,7 +1335,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
 // ==================== FIREBASE CONFIG ====================
 // Configuración de Firebase - Proyecto FerreCloud
 const firebaseConfig = {
@@ -2344,45 +2344,36 @@ function searchProductImage() {
     const preview = document.getElementById('imagePreview');
     preview.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:40px;color:var(--primary);"></i><span>Buscando...</span>';
     
-    const searchTerms = getImageSearchTerms(name, category);
+    // Usar Lorem Picsum que es más confiable
+    const randomId = Math.floor(Math.random() * 1000);
+    const url = `https://picsum.photos/seed/${encodeURIComponent(name.substring(0,20))}_${randomId}/800/600`;
     
-    // Usar múltiples fuentes de imágenes
-    const sources = [
-        `https://source.unsplash.com/800x600/?${encodeURIComponent(searchTerms)}`,
-        `https://source.unsplash.com/800x600/?tool,hardware`,
-        `https://source.unsplash.com/800x600/?construction,tool`
-    ];
+    const img = new Image();
     
-    let currentSource = 0;
+    img.onload = function() {
+        currentProductImage = url;
+        preview.innerHTML = `<img src="${url}" alt="Preview">`;
+        preview.classList.add('has-image');
+        document.getElementById('btnRemoveImage').style.display = 'inline-flex';
+        document.getElementById('productImageUrl').value = url;
+        showToast('success', 'Imagen cargada', 'Podés buscar otra si no te gusta');
+    };
     
-    function tryLoadImage() {
-        if(currentSource >= sources.length) {
-            preview.innerHTML = '<i class="fas fa-image"></i><span>No se encontró imagen</span>';
-            showToast('error', 'Error', 'No se pudo encontrar una imagen');
-            return;
-        }
+    img.onerror = function() {
+        // Fallback a placeholder con color
+        const colors = ['3498db', 'e74c3c', '2ecc71', 'f39c12', '9b59b6', '1abc9c'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const fallbackUrl = `https://via.placeholder.com/800x600/${color}/ffffff?text=${encodeURIComponent(name.substring(0,15))}`;
         
-        const url = sources[currentSource] + '&t=' + Date.now(); // Evitar caché
-        const img = new Image();
-        
-        img.onload = function() {
-            currentProductImage = url;
-            preview.innerHTML = `<img src="${url}" alt="Preview">`;
-            preview.classList.add('has-image');
-            document.getElementById('btnRemoveImage').style.display = 'inline-flex';
-            document.getElementById('productImageUrl').value = url;
-            showToast('success', 'Imagen encontrada', 'Podés buscar otra si no te gusta');
-        };
-        
-        img.onerror = function() {
-            currentSource++;
-            tryLoadImage();
-        };
-        
-        img.src = url;
-    }
+        currentProductImage = fallbackUrl;
+        preview.innerHTML = `<img src="${fallbackUrl}" alt="Preview">`;
+        preview.classList.add('has-image');
+        document.getElementById('btnRemoveImage').style.display = 'inline-flex';
+        document.getElementById('productImageUrl').value = fallbackUrl;
+        showToast('info', 'Placeholder', 'Se usó imagen genérica');
+    };
     
-    tryLoadImage();
+    img.src = url;
 }
 
 async function autoLoadAllImages() {
@@ -2402,8 +2393,9 @@ async function autoLoadAllImages() {
     let errors = 0;
     
     for(const product of productsWithoutImage) {
-        const searchTerms = getImageSearchTerms(product.name, product.category);
-        const url = `https://source.unsplash.com/800x600/?${encodeURIComponent(searchTerms)}&t=${Date.now()}_${product.id}`;
+        // Usar Lorem Picsum con seed basado en nombre del producto
+        const seed = encodeURIComponent((product.name || 'product').substring(0, 20) + '_' + product.id);
+        const url = `https://picsum.photos/seed/${seed}/800/600`;
         
         // Verificar que la imagen carga
         const success = await new Promise(resolve => {
@@ -2414,17 +2406,26 @@ async function autoLoadAllImages() {
                 resolve(true);
             };
             img.onerror = () => {
-                errors++;
-                resolve(false);
+                // Fallback a placeholder
+                const colors = ['3498db', 'e74c3c', '2ecc71', 'f39c12', '9b59b6'];
+                const color = colors[product.id % colors.length];
+                product.image = `https://via.placeholder.com/800x600/${color}/ffffff?text=${encodeURIComponent((product.name || 'Producto').substring(0,12))}`;
+                loaded++;
+                resolve(true);
             };
             img.src = url;
             
             // Timeout de 5 segundos
-            setTimeout(() => resolve(false), 5000);
+            setTimeout(() => {
+                if(!product.image) {
+                    errors++;
+                    resolve(false);
+                }
+            }, 5000);
         });
         
         // Pequeña pausa para no saturar
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 200));
     }
     
     saveData();
