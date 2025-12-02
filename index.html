@@ -103,6 +103,13 @@
         .firebase-status { position: fixed; bottom: 20px; right: 20px; padding: 10px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; z-index: 1000; display: flex; align-items: center; gap: 8px; }
         .firebase-status.online { background: #D1FAE5; color: #065F46; }
         .firebase-status.offline { background: #FEE2E2; color: #991B1B; }
+        
+        /* WhatsApp Button */
+        .whatsapp-btn { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; text-decoration: none; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); z-index: 999; transition: all 0.3s ease; }
+        .whatsapp-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5); }
+        .whatsapp-btn .tooltip { position: absolute; right: 70px; background: white; color: var(--text-primary); padding: 10px 15px; border-radius: var(--radius); font-size: 14px; white-space: nowrap; box-shadow: var(--shadow-lg); opacity: 0; visibility: hidden; transition: 0.3s; }
+        .whatsapp-btn:hover .tooltip { opacity: 1; visibility: visible; }
+        @media (max-width: 768px) { .whatsapp-btn { bottom: 80px; width: 55px; height: 55px; font-size: 26px; } .whatsapp-btn .tooltip { display: none; } }
         .firebase-status.syncing { background: #FEF3C7; color: #92400E; }
         
         /* Header */
@@ -213,6 +220,8 @@
         .product-footer { display: flex; gap: 10px; }
         .add-cart-btn { flex: 1; padding: 12px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .add-cart-btn:hover { background: var(--primary-dark); }
+        .whatsapp-product-btn { padding: 12px 14px; background: #25D366; color: white; border: none; border-radius: var(--radius); cursor: pointer; transition: 0.3s; font-size: 16px; }
+        .whatsapp-product-btn:hover { background: #128C7E; }
         .buy-now-btn { padding: 12px 20px; background: var(--secondary); color: white; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: 0.3s; }
         .buy-now-btn:hover { background: var(--secondary-light); }
         
@@ -802,7 +811,7 @@
                 <!-- Products -->
                 <section class="admin-section" id="section-products">
                     <div class="admin-card">
-                        <div class="card-header"><h3 class="card-title">Gestión de Productos</h3><div class="card-actions"><button class="btn btn-outline" onclick="showImportModal()"><i class="fas fa-file-import"></i> Importar</button><button class="btn btn-primary" onclick="showProductModal()"><i class="fas fa-plus"></i> Nuevo</button></div></div>
+                        <div class="card-header"><h3 class="card-title">Gestión de Productos</h3><div class="card-actions"><button class="btn btn-outline" onclick="exportProducts('csv')"><i class="fas fa-file-export"></i> Exportar</button><button class="btn btn-outline" onclick="showImportModal()"><i class="fas fa-file-import"></i> Importar</button><button class="btn btn-primary" onclick="showProductModal()"><i class="fas fa-plus"></i> Nuevo</button></div></div>
                         <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>Producto</th><th>Código</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="productsTableBody"></tbody></table></div></div>
                     </div>
                 </section>
@@ -1120,6 +1129,12 @@
         <i class="fas fa-database"></i>
         <span id="firebaseStatusText">Conectando...</span>
     </div>
+
+    <!-- WhatsApp Button -->
+    <a href="#" class="whatsapp-btn" id="whatsappBtn" onclick="openWhatsApp()" title="Chatea con nosotros">
+        <i class="fab fa-whatsapp"></i>
+        <span class="tooltip">¡Chatea con nosotros!</span>
+    </a>
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
@@ -1547,6 +1562,7 @@ function renderProducts(products = null) {
                     <div class="product-footer">
                         <button class="add-cart-btn" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> Agregar</button>
                         <button class="buy-now-btn" onclick="buyNow(${p.id})">Comprar</button>
+                        <button class="whatsapp-product-btn" onclick="openWhatsApp('${p.name.replace(/'/g, "\\'")}')"><i class="fab fa-whatsapp"></i></button>
                     </div>
                 </div>
             </div>
@@ -2254,6 +2270,66 @@ function processImport() {
 }
 
 function showAuthModal() { showModal('authModal'); }
+
+function exportProducts(format) {
+    if(appData.products.length === 0) {
+        showToast('error', 'Error', 'No hay productos para exportar');
+        return;
+    }
+    
+    let content, filename, type;
+    
+    if(format === 'json') {
+        // Exportar JSON
+        const exportData = {
+            products: appData.products,
+            categories: appData.categories,
+            exportDate: new Date().toISOString(),
+            totalProducts: appData.products.length
+        };
+        content = JSON.stringify(exportData, null, 2);
+        filename = `productos_ferrecloud_${getDateString()}.json`;
+        type = 'application/json';
+    } else {
+        // Exportar CSV
+        const headers = ['Código', 'Nombre', 'Categoría', 'Precio', 'Precio Original', 'Stock', 'Stock Mínimo', 'Marca', 'Descripción', 'Activo', 'Destacado'];
+        const rows = appData.products.map(p => [
+            p.code || '',
+            `"${(p.name || '').replace(/"/g, '""')}"`,
+            `"${(p.category || '').replace(/"/g, '""')}"`,
+            p.price || 0,
+            p.originalPrice || 0,
+            p.stock || 0,
+            p.minStock || 5,
+            `"${(p.brand || '').replace(/"/g, '""')}"`,
+            `"${(p.description || '').replace(/"/g, '""').slice(0, 200)}"`,
+            p.active ? 'SI' : 'NO',
+            p.featured ? 'SI' : 'NO'
+        ]);
+        
+        content = '\uFEFF' + headers.join(';') + '\n' + rows.map(r => r.join(';')).join('\n');
+        filename = `productos_ferrecloud_${getDateString()}.csv`;
+        type = 'text/csv;charset=utf-8';
+    }
+    
+    // Descargar archivo
+    const blob = new Blob([content], { type: type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('success', 'Exportado', `${appData.products.length} productos exportados`);
+}
+
+function getDateString() {
+    const d = new Date();
+    return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
 function handleLogin() {
     const email = document.getElementById('loginEmail').value;
     if(!email) { showToast('error','Error','Ingresá tu email'); return; }
@@ -2317,6 +2393,38 @@ function loadCompanyData() {
     document.getElementById('footerPhone').textContent = phone;
     document.getElementById('footerEmail').textContent = email;
     document.getElementById('footerCompanyName').textContent = c.name || 'FerreCloud';
+    
+    // Guardar WhatsApp para el botón flotante
+    window.companyWhatsapp = c.whatsapp || c.phone || '';
+    window.companyName = c.name || 'Ferretería Bruzzone';
+}
+
+function openWhatsApp(productName = null) {
+    let whatsapp = window.companyWhatsapp || '';
+    
+    // Limpiar número (solo números y +)
+    whatsapp = whatsapp.replace(/[^0-9+]/g, '');
+    
+    // Si no tiene código de país, agregar Argentina
+    if(whatsapp && !whatsapp.startsWith('+')) {
+        whatsapp = '+54' + whatsapp;
+    }
+    
+    if(!whatsapp) {
+        showToast('error', 'Error', 'No hay número de WhatsApp configurado');
+        return;
+    }
+    
+    // Mensaje predeterminado
+    let mensaje = `¡Hola! Me contacto desde ${window.companyName || 'la web'}.`;
+    if(productName) {
+        mensaje = `¡Hola! Estoy interesado en: *${productName}*. ¿Podrían darme más información?`;
+    } else {
+        mensaje += ' Quisiera hacer una consulta.';
+    }
+    
+    const url = `https://wa.me/${whatsapp.replace('+', '')}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
 }
 
 function savePaymentSettings(e) { e.preventDefault(); showToast('success','Guardado','Pagos configurados'); }
