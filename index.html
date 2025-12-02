@@ -546,7 +546,7 @@
         <header class="store-header">
             <div class="header-top">
                 <div class="container">
-                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#d1" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText"><span class="__cf_email__" data-cfemail="07716269736674476162757562646b6872632964686a">[email&#160;protected]</span></span></a></div>
+                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="mailto:" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText">ventas@ferrecloud.com</span></a></div>
                     <div><i class="fas fa-truck"></i> Envío gratis en compras +$<span id="headerFreeShipping">50.000</span></div>
                 </div>
             </div>
@@ -718,14 +718,14 @@
                         <a href="#" class="logo"><img src="logo.jpg" alt="Ferretería Bruzzone" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span class="logo-text" style="display:none;">Ferretería <span>Bruzzone</span></span></a>
                         <p>Tu ferretería de confianza con más de 10 años de experiencia. Todo lo que necesitas para tu hogar y obra en un solo lugar.</p>
                         <div class="social-links">
-                            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                            <a href="#" class="social-link" id="socialFacebook" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-link" id="socialInstagram" target="_blank"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-link" id="socialWhatsapp" target="_blank"><i class="fab fa-whatsapp"></i></a>
                         </div>
                     </div>
                     <div><h4 class="footer-title">Enlaces</h4><ul class="footer-links"><li><a href="#">Inicio</a></li><li><a href="#">Productos</a></li><li><a href="#">Ofertas</a></li><li><a href="#">Contacto</a></li></ul></div>
                     <div><h4 class="footer-title">Categorías</h4><ul class="footer-links" id="footerCategories"></ul></div>
-                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="196f7c776d786a597f7c6b6b7c7a75766c7d377a7674">[email&#160;protected]</a></span></li></ul></div>
+                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail">ventas@ferrecloud.com</span></li></ul></div>
                 </div>
                 <div class="footer-bottom">
                     <p>&copy; 2025 <span id="footerCompanyName">FerreCloud</span>. Todos los derechos reservados.</p>
@@ -866,7 +866,8 @@
                                     <div class="form-group"><label class="form-label">Teléfono</label><input type="text" class="form-input" id="companyPhone" value="(358) 412-3456"></div>
                                     <div class="form-group"><label class="form-label">WhatsApp</label><input type="text" class="form-input" id="companyWhatsapp" placeholder="+54 9 358 123 4567"></div>
                                     <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="companyEmail" value="ventas@ferrecloud.com"></div>
-                                    <div class="form-group"><label class="form-label">Instagram</label><input type="text" class="form-input" id="companyInstagram" placeholder="@ferrecloud"></div>
+                                    <div class="form-group"><label class="form-label">Instagram</label><input type="text" class="form-input" id="companyInstagram" placeholder="@ferreteria.bruzzone"></div>
+                                    <div class="form-group"><label class="form-label">Facebook</label><input type="text" class="form-input" id="companyFacebook" placeholder="ferreteriabruzzone"></div>
                                     <div class="form-group full"><label class="form-label">Descripción</label><textarea class="form-textarea" id="companyDescription">Tu ferretería de confianza con más de 10 años de experiencia.</textarea></div>
                                     <div class="form-group"><label class="form-label">Horario</label><input type="text" class="form-input" id="companyHours" value="Lun-Sab: 8:00 - 20:00"></div>
                                     <div class="form-group"><label class="form-label">Monto Envío Gratis</label><input type="number" class="form-input" id="companyFreeShipping" value="50000"></div>
@@ -1139,7 +1140,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
 // ==================== FIREBASE CONFIG ====================
 // Configuración de Firebase - Proyecto FerreCloud
 const firebaseConfig = {
@@ -2355,11 +2356,14 @@ function saveCompanyData(e) {
         whatsapp: document.getElementById('companyWhatsapp').value,
         email: document.getElementById('companyEmail').value,
         instagram: document.getElementById('companyInstagram').value,
+        facebook: document.getElementById('companyFacebook').value,
         description: document.getElementById('companyDescription').value,
         hours: document.getElementById('companyHours').value,
         freeShipping: parseInt(document.getElementById('companyFreeShipping').value) || 50000
     };
-    saveData(); showToast('success','Guardado','Datos actualizados');
+    saveData(); 
+    loadCompanyData(); // Actualizar links de redes sociales
+    showToast('success','Guardado','Datos actualizados');
 }
 
 function loadCompanyData() {
@@ -2373,6 +2377,7 @@ function loadCompanyData() {
     document.getElementById('companyWhatsapp').value = c.whatsapp || '';
     document.getElementById('companyEmail').value = c.email || '';
     document.getElementById('companyInstagram').value = c.instagram || '';
+    document.getElementById('companyFacebook').value = c.facebook || '';
     document.getElementById('companyDescription').value = c.description || '';
     document.getElementById('companyHours').value = c.hours || '';
     document.getElementById('companyFreeShipping').value = c.freeShipping || 50000;
@@ -2393,6 +2398,38 @@ function loadCompanyData() {
     document.getElementById('footerPhone').textContent = phone;
     document.getElementById('footerEmail').textContent = email;
     document.getElementById('footerCompanyName').textContent = c.name || 'FerreCloud';
+    
+    // Configurar links de redes sociales
+    const whatsappNum = (c.whatsapp || c.phone || '').replace(/[^0-9]/g, '');
+    const instagram = c.instagram || '';
+    const facebook = c.facebook || '';
+    
+    // WhatsApp
+    if(whatsappNum) {
+        const waNum = whatsappNum.startsWith('54') ? whatsappNum : '54' + whatsappNum;
+        document.getElementById('socialWhatsapp').href = `https://wa.me/${waNum}`;
+        document.getElementById('socialWhatsapp').style.display = 'flex';
+    } else {
+        document.getElementById('socialWhatsapp').style.display = 'none';
+    }
+    
+    // Instagram
+    if(instagram) {
+        const igUser = instagram.replace('@', '');
+        document.getElementById('socialInstagram').href = `https://instagram.com/${igUser}`;
+        document.getElementById('socialInstagram').style.display = 'flex';
+    } else {
+        document.getElementById('socialInstagram').style.display = 'none';
+    }
+    
+    // Facebook
+    if(facebook) {
+        const fbUser = facebook.replace(/.*facebook.com\//, '').replace('@', '');
+        document.getElementById('socialFacebook').href = `https://facebook.com/${fbUser}`;
+        document.getElementById('socialFacebook').style.display = 'flex';
+    } else {
+        document.getElementById('socialFacebook').style.display = 'none';
+    }
     
     // Guardar WhatsApp para el botón flotante
     window.companyWhatsapp = c.whatsapp || c.phone || '';
