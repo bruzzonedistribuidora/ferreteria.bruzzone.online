@@ -45,6 +45,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
             --primary: #2A7AB8;
@@ -3307,6 +3308,108 @@ function exportImageList() {
         return;
     }
     
+    // Preguntar qué método usar
+    const method = confirm(
+        `📸 Hay ${productsWithImages.length} imágenes para descargar.\n\n` +
+        `¿Querés descargarlas TODAS en un ZIP?\n\n` +
+        `• Aceptar = Descargar ZIP (puede tardar unos minutos)\n` +
+        `• Cancelar = Ver lista para descargar manual`
+    );
+    
+    if(method) {
+        downloadAllImagesAsZip(productsWithImages);
+    } else {
+        showImageListHTML(productsWithImages);
+    }
+}
+
+// Descargar todas las imágenes en un ZIP
+async function downloadAllImagesAsZip(products) {
+    const zip = new JSZip();
+    const folder = zip.folder("images");
+    
+    let downloaded = 0;
+    let errors = 0;
+    const total = products.length;
+    
+    // Crear modal de progreso
+    const progressModal = document.createElement('div');
+    progressModal.id = 'downloadProgressModal';
+    progressModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    progressModal.innerHTML = `
+        <div style="background:white;padding:40px;border-radius:15px;text-align:center;max-width:400px;width:90%;">
+            <i class="fas fa-download" style="font-size:50px;color:#2A7AB8;margin-bottom:20px;"></i>
+            <h3 style="margin:0 0 10px;">Descargando imágenes...</h3>
+            <p id="downloadProgress" style="color:#666;margin-bottom:20px;">0 de ${total}</p>
+            <div style="background:#eee;border-radius:10px;height:20px;overflow:hidden;">
+                <div id="downloadProgressBar" style="background:#2A7AB8;height:100%;width:0%;transition:width 0.3s;"></div>
+            </div>
+            <p id="downloadStatus" style="color:#999;font-size:13px;margin-top:15px;">Iniciando...</p>
+        </div>
+    `;
+    document.body.appendChild(progressModal);
+    
+    const updateProgress = (current, status) => {
+        document.getElementById('downloadProgress').textContent = `${current} de ${total}`;
+        document.getElementById('downloadProgressBar').style.width = `${(current/total)*100}%`;
+        document.getElementById('downloadStatus').textContent = status;
+    };
+    
+    for(const product of products) {
+        const fileName = (product.code || 'PROD-' + product.id) + '.jpg';
+        updateProgress(downloaded, `Descargando: ${product.name.substring(0, 30)}...`);
+        
+        try {
+            // Usar proxy para evitar CORS
+            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(product.image);
+            const response = await fetch(proxyUrl);
+            
+            if(response.ok) {
+                const blob = await response.blob();
+                folder.file(fileName, blob);
+                downloaded++;
+            } else {
+                errors++;
+                console.log('Error descargando:', product.image);
+            }
+        } catch(e) {
+            errors++;
+            console.log('Error CORS:', product.image, e);
+        }
+        
+        // Pequeña pausa para no saturar
+        await new Promise(r => setTimeout(r, 100));
+    }
+    
+    updateProgress(total, 'Creando archivo ZIP...');
+    
+    try {
+        const content = await zip.generateAsync({type: 'blob'});
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'imagenes_productos.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        document.body.removeChild(progressModal);
+        
+        if(errors > 0) {
+            showToast('warning', 'Descarga parcial', `${downloaded} descargadas, ${errors} con error (pueden requerir descarga manual)`);
+        } else {
+            showToast('success', '¡Listo!', `${downloaded} imágenes descargadas en ZIP`);
+        }
+    } catch(e) {
+        document.body.removeChild(progressModal);
+        showToast('error', 'Error', 'No se pudo crear el ZIP');
+        console.error(e);
+    }
+}
+
+// Mostrar lista HTML de imágenes
+function showImageListHTML(productsWithImages) {
     let html = `<!DOCTYPE html>
 <html>
 <head>
