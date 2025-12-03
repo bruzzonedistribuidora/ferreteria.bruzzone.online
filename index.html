@@ -209,7 +209,7 @@
         .product-action-btn:hover { background: var(--primary); color: white; }
         .product-image { height: 200px; background: #FAFAFA; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; overflow: hidden; }
         .product-image i { font-size: 60px; color: var(--text-light); }
-        .product-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; display: block !important; visibility: visible !important; opacity: 1 !important; }
         .product-card:hover .product-image img { transform: scale(1.05); }
         .image-counter { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 15px; font-size: 11px; z-index: 5; display: flex; align-items: center; gap: 4px; }
         .product-info { padding: 20px; background: #FFFFFF; }
@@ -506,6 +506,8 @@
             .nav-list a { padding: 8px 12px; font-size: 13px; }
             .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             .product-card { padding: 10px; }
+            .product-image { height: 150px; min-height: 150px; }
+            .product-image img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
             .product-name { font-size: 14px; }
             .product-footer { flex-wrap: wrap; gap: 8px; }
             .product-footer .add-cart-btn { flex: 1 1 100%; }
@@ -2053,18 +2055,18 @@ function initSampleData() {
         { id: 8, name: 'Iluminación', icon: 'fa-lightbulb', active: true, productCount: 0 }
     ];
     appData.products = [
-        { id: 1, name: 'Martillo Carpintero Stanley 20oz', code: 'HM-001', category: 'Herramientas Manuales', brand: 'Stanley', price: 15500, salePrice: 12900, stock: 25, minStock: 5, description: 'Martillo profesional con mango de fibra de vidrio', active: true, featured: true, badge: 'sale', image: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop'] },
-        { id: 2, name: 'Taladro Percutor Bosch 750W', code: 'EL-001', category: 'Electricidad', brand: 'Bosch', price: 89900, salePrice: null, stock: 12, minStock: 3, active: true, featured: true, badge: 'hot', image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop'] },
-        { id: 3, name: 'Llave Francesa Ajustable 12"', code: 'HM-002', category: 'Herramientas Manuales', brand: 'Bahco', price: 18500, salePrice: null, stock: 30, minStock: 5, active: true, featured: false, image: 'https://images.unsplash.com/photo-1581147036324-c17c82d3b839?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1581147036324-c17c82d3b839?w=400&h=400&fit=crop'] },
-        { id: 4, name: 'Set Destornilladores x10 pzas', code: 'HM-003', category: 'Herramientas Manuales', brand: 'Stanley', price: 8900, salePrice: 7500, stock: 45, minStock: 10, active: true, featured: true, badge: 'sale', image: 'https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=400&h=400&fit=crop'] },
-        { id: 5, name: 'Cable Unipolar 2.5mm x 100m', code: 'EL-002', category: 'Electricidad', brand: 'Trefilcon', price: 32000, salePrice: null, stock: 8, minStock: 5, active: true, featured: false, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop'] },
-        { id: 6, name: 'Canilla Esférica 1/2"', code: 'PL-001', category: 'Plomería', brand: 'FV', price: 4500, salePrice: null, stock: 60, minStock: 15, active: true, featured: false, image: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop'] },
-        { id: 7, name: 'Pintura Látex Interior 20L', code: 'PI-001', category: 'Pinturas', brand: 'Alba', price: 45000, salePrice: 39900, stock: 15, minStock: 5, active: true, featured: true, badge: 'sale', image: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&h=400&fit=crop'] },
-        { id: 8, name: 'Cerradura de Seguridad 3 Puntos', code: 'CE-001', category: 'Cerrajería', brand: 'Prive', price: 78000, salePrice: null, stock: 6, minStock: 2, active: true, featured: true, badge: 'new', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop'] },
-        { id: 9, name: 'Tornillos Autoperforantes x500', code: 'TO-001', category: 'Tornillería', brand: 'Nacional', price: 5200, salePrice: null, stock: 100, minStock: 20, active: true, featured: false, image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop'] },
-        { id: 10, name: 'Manguera de Jardín 15m', code: 'JA-001', category: 'Jardinería', brand: 'Tramontina', price: 12500, salePrice: 9900, stock: 20, minStock: 5, active: true, featured: true, badge: 'sale', image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop'] },
-        { id: 11, name: 'Lámpara LED Panel 60x60', code: 'IL-001', category: 'Iluminación', brand: 'Philips', price: 18900, salePrice: null, stock: 25, minStock: 5, active: true, featured: false, image: 'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop'] },
-        { id: 12, name: 'Amoladora Angular 4.5" 850W', code: 'EL-003', category: 'Electricidad', brand: 'DeWalt', price: 125000, salePrice: null, stock: 8, minStock: 2, active: true, featured: true, badge: 'hot', image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop'] }
+        { id: 1, name: 'Martillo Carpintero Stanley 20oz', code: 'HM-001', category: 'Herramientas Manuales', brand: 'Stanley', price: 15500, salePrice: 12900, stock: 25, minStock: 5, description: 'Martillo profesional con mango de fibra de vidrio', active: true, featured: true, badge: 'sale', image: 'https://placehold.co/400x400/2563EB/ffffff?text=Martillo', images: ['https://placehold.co/400x400/2563EB/ffffff?text=Martillo'] },
+        { id: 2, name: 'Taladro Percutor Bosch 750W', code: 'EL-001', category: 'Electricidad', brand: 'Bosch', price: 89900, salePrice: null, stock: 12, minStock: 3, active: true, featured: true, badge: 'hot', image: 'https://placehold.co/400x400/F59E0B/ffffff?text=Taladro', images: ['https://placehold.co/400x400/F59E0B/ffffff?text=Taladro'] },
+        { id: 3, name: 'Llave Francesa Ajustable 12"', code: 'HM-002', category: 'Herramientas Manuales', brand: 'Bahco', price: 18500, salePrice: null, stock: 30, minStock: 5, active: true, featured: false, image: 'https://placehold.co/400x400/2563EB/ffffff?text=Llave', images: ['https://placehold.co/400x400/2563EB/ffffff?text=Llave'] },
+        { id: 4, name: 'Set Destornilladores x10 pzas', code: 'HM-003', category: 'Herramientas Manuales', brand: 'Stanley', price: 8900, salePrice: 7500, stock: 45, minStock: 10, active: true, featured: true, badge: 'sale', image: 'https://placehold.co/400x400/2563EB/ffffff?text=Destornilladores', images: ['https://placehold.co/400x400/2563EB/ffffff?text=Destornilladores'] },
+        { id: 5, name: 'Cable Unipolar 2.5mm x 100m', code: 'EL-002', category: 'Electricidad', brand: 'Trefilcon', price: 32000, salePrice: null, stock: 8, minStock: 5, active: true, featured: false, image: 'https://placehold.co/400x400/F59E0B/ffffff?text=Cable', images: ['https://placehold.co/400x400/F59E0B/ffffff?text=Cable'] },
+        { id: 6, name: 'Canilla Esférica 1/2"', code: 'PL-001', category: 'Plomería', brand: 'FV', price: 4500, salePrice: null, stock: 60, minStock: 15, active: true, featured: false, image: 'https://placehold.co/400x400/3B82F6/ffffff?text=Canilla', images: ['https://placehold.co/400x400/3B82F6/ffffff?text=Canilla'] },
+        { id: 7, name: 'Pintura Látex Interior 20L', code: 'PI-001', category: 'Pinturas', brand: 'Alba', price: 45000, salePrice: 39900, stock: 15, minStock: 5, active: true, featured: true, badge: 'sale', image: 'https://placehold.co/400x400/10B981/ffffff?text=Pintura', images: ['https://placehold.co/400x400/10B981/ffffff?text=Pintura'] },
+        { id: 8, name: 'Cerradura de Seguridad 3 Puntos', code: 'CE-001', category: 'Cerrajería', brand: 'Prive', price: 78000, salePrice: null, stock: 6, minStock: 2, active: true, featured: true, badge: 'new', image: 'https://placehold.co/400x400/6366F1/ffffff?text=Cerradura', images: ['https://placehold.co/400x400/6366F1/ffffff?text=Cerradura'] },
+        { id: 9, name: 'Tornillos Autoperforantes x500', code: 'TO-001', category: 'Tornillería', brand: 'Nacional', price: 5200, salePrice: null, stock: 100, minStock: 20, active: true, featured: false, image: 'https://placehold.co/400x400/6B7280/ffffff?text=Tornillos', images: ['https://placehold.co/400x400/6B7280/ffffff?text=Tornillos'] },
+        { id: 10, name: 'Manguera de Jardín 15m', code: 'JA-001', category: 'Jardinería', brand: 'Tramontina', price: 12500, salePrice: 9900, stock: 20, minStock: 5, active: true, featured: true, badge: 'sale', image: 'https://placehold.co/400x400/059669/ffffff?text=Manguera', images: ['https://placehold.co/400x400/059669/ffffff?text=Manguera'] },
+        { id: 11, name: 'Lámpara LED Panel 60x60', code: 'IL-001', category: 'Iluminación', brand: 'Philips', price: 18900, salePrice: null, stock: 25, minStock: 5, active: true, featured: false, image: 'https://placehold.co/400x400/FBBF24/ffffff?text=Lampara', images: ['https://placehold.co/400x400/FBBF24/ffffff?text=Lampara'] },
+        { id: 12, name: 'Amoladora Angular 4.5" 850W', code: 'EL-003', category: 'Electricidad', brand: 'DeWalt', price: 125000, salePrice: null, stock: 8, minStock: 2, active: true, featured: true, badge: 'hot', image: 'https://placehold.co/400x400/F59E0B/ffffff?text=Amoladora', images: ['https://placehold.co/400x400/F59E0B/ffffff?text=Amoladora'] }
     ];
     appData.shippingZones = [
         { id: 1, name: 'Alejandro Roca', time: '1-2 días', cost: 0, description: 'Entrega local sin cargo', minFree: 0, active: true },
@@ -2155,11 +2157,17 @@ function renderProducts(products = null) {
         // Obtener imágenes (compatibilidad con imagen única o array)
         const images = p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []);
         const hasMultipleImages = images.length > 1;
-        const mainImage = images[0];
+        let mainImage = images[0];
         
-        const productImageHtml = mainImage 
-            ? `<img src="${mainImage}" alt="${p.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-box-open\\'></i>'">`
-            : '<i class="fas fa-box-open"></i>';
+        // Si no tiene imagen, generar placeholder
+        if(!mainImage) {
+            const colors = {'Herramientas Manuales':'2563EB','Electricidad':'F59E0B','Plomería':'3B82F6','Pinturas':'10B981','Cerrajería':'6366F1','Tornillería':'6B7280','Jardinería':'059669','Iluminación':'FBBF24'};
+            const color = colors[p.category] || '2A7AB8';
+            const text = encodeURIComponent((p.name || 'Producto').substring(0, 12));
+            mainImage = `https://placehold.co/400x400/${color}/ffffff?text=${text}`;
+        }
+        
+        const productImageHtml = `<img src="${mainImage}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/cccccc/666666?text=Sin+Imagen';">`;
         
         const imageCounter = hasMultipleImages ? `<span class="image-counter"><i class="fas fa-images"></i> ${images.length}</span>` : '';
         
