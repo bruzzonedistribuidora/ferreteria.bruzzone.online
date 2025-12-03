@@ -38,7 +38,7 @@
         
         /* Loader */
         .loader-overlay { position: fixed; inset: 0; background: var(--secondary); display: flex; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.5s; }
-        .loader-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loader-overlay.hidden { opacity: 0; pointer-events: none; display: none !important; }
         .loader-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 20px; display: flex; align-items: center; justify-content: center; animation: pulse 1.5s ease-in-out infinite; }
         .loader-icon i { font-size: 36px; color: white; }
         .loader-text { color: white; font-size: 18px; font-weight: 600; margin-top: 20px; text-align: center; }
@@ -600,7 +600,7 @@
         <header class="store-header">
             <div class="header-top">
                 <div class="container">
-                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#7f" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText"><span class="__cf_email__" data-cfemail="56203338223725163033242433353a3923327835393b">[email&#160;protected]</span></span></a></div>
+                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="mailto:" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText">ventas@ferrecloud.com</span></a></div>
                     <div><i class="fas fa-truck"></i> Envío gratis en compras +$<span id="headerFreeShipping">50.000</span></div>
                 </div>
             </div>
@@ -779,7 +779,7 @@
                     </div>
                     <div><h4 class="footer-title">Enlaces</h4><ul class="footer-links"><li><a href="#">Inicio</a></li><li><a href="#">Productos</a></li><li><a href="#">Ofertas</a></li><li><a href="#">Contacto</a></li></ul></div>
                     <div><h4 class="footer-title">Categorías</h4><ul class="footer-links" id="footerCategories"></ul></div>
-                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f98f9c978d988ab99f9c8b8b9c9a95968c9dd79a9694">[email&#160;protected]</a></span></li></ul></div>
+                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail">ventas@ferrecloud.com</span></li></ul></div>
                 </div>
                 <div class="footer-bottom">
                     <p>&copy; 2025 <span id="footerCompanyName">FerreCloud</span>. Todos los derechos reservados.</p>
@@ -1410,7 +1410,7 @@
                         </div>
                         <div>
                             <h4 style="margin: 0; font-size: 18px;" id="customerAccountName">Cliente</h4>
-                            <p style="margin: 5px 0 0; opacity: 0.9; font-size: 14px;" id="customerAccountEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b7d2dad6dedbf7d2ddd2dac7dbd899d4d8da">[email&#160;protected]</a></p>
+                            <p style="margin: 5px 0 0; opacity: 0.9; font-size: 14px;" id="customerAccountEmail">email@ejemplo.com</p>
                         </div>
                     </div>
                 </div>
@@ -1574,7 +1574,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
 // ==================== FIREBASE CONFIG ====================
 // Configuración de Firebase - Proyecto FerreCloud
 const firebaseConfig = {
@@ -1806,6 +1806,11 @@ async function loadDataFromFirebase() {
     try {
         updateFirebaseStatus('syncing', 'Sincronizando...');
         
+        // Timeout de 5 segundos para evitar bloqueos
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        
         const collections = ['products', 'categories', 'orders', 'customers', 'coupons', 'shippingZones', 'banners'];
         
         for(const col of collections) {
@@ -1910,48 +1915,63 @@ function saveDataLocal() {
 }
 
 // ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        // Inicializar Firebase
-        initFirebase();
-        
-        // Cargar datos
-        await loadData();
-        
-        // Inicializar slider
-        initSlider();
-        
-        // Ocultar loader y mostrar tienda
-        setTimeout(() => {
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('storeView').style.display = 'block';
-        }, 1500);
-        
-    } catch(e) {
-        console.error('Error inicializando:', e);
-        document.getElementById('loader').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
-    }
-});
-
-async function loadData() {
-    // Intentar cargar de Firebase primero
-    if(firebaseEnabled) {
-        const loaded = await loadDataFromFirebase();
-        if(loaded && appData.products.length > 0) {
-            renderAll();
-            return;
-        }
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('FerreCloud iniciando...');
     
-    // Fallback a localStorage
-    const saved = localStorage.getItem('ferrecloud_data');
-    if(saved) {
-        appData = { ...appData, ...JSON.parse(saved) };
-    } else {
+    // 1. Ocultar loader inmediatamente
+    var loader = document.getElementById('loader');
+    var store = document.getElementById('storeView');
+    if(loader) loader.style.display = 'none';
+    if(store) store.style.display = 'block';
+    
+    console.log('Loader oculto, tienda visible');
+    
+    // 2. Cargar datos
+    try {
+        var saved = localStorage.getItem('ferrecloud_data');
+        if(saved) {
+            var parsed = JSON.parse(saved);
+            for(var key in parsed) {
+                if(parsed.hasOwnProperty(key)) {
+                    appData[key] = parsed[key];
+                }
+            }
+            console.log('Datos cargados de localStorage');
+        } else {
+            initSampleData();
+            console.log('Datos de ejemplo cargados');
+        }
+    } catch(e) {
+        console.error('Error cargando datos:', e);
         initSampleData();
     }
-    renderAll();
-}
+    
+    // 3. Renderizar
+    try {
+        renderAll();
+        console.log('Renderizado completo');
+    } catch(e) {
+        console.error('Error en renderAll:', e);
+    }
+    
+    // 4. Slider (opcional)
+    try {
+        initSlider();
+    } catch(e) {
+        console.log('Slider error (no crítico):', e);
+    }
+    
+    // 5. Firebase (en background, no crítico)
+    setTimeout(function() {
+        try {
+            initFirebase();
+        } catch(e) {
+            console.log('Firebase no disponible');
+        }
+    }, 1000);
+    
+    console.log('FerreCloud listo!');
+});
 
 function saveData() {
     if(firebaseEnabled) {
@@ -4022,59 +4042,6 @@ function getDateString() {
     const d = new Date();
     return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
 }
-    if(appData.products.length === 0) {
-        showToast('error', 'Error', 'No hay productos para exportar');
-        return;
-    }
-    
-    let content, filename, type;
-    
-    if(format === 'json') {
-        // Exportar JSON
-        const exportData = {
-            products: appData.products,
-            categories: appData.categories,
-            exportDate: new Date().toISOString(),
-            totalProducts: appData.products.length
-        };
-        content = JSON.stringify(exportData, null, 2);
-        filename = `productos_ferrecloud_${getDateString()}.json`;
-        type = 'application/json';
-    } else {
-        // Exportar CSV
-        const headers = ['Código', 'Nombre', 'Categoría', 'Precio', 'Precio Original', 'Stock', 'Stock Mínimo', 'Marca', 'Descripción', 'Activo', 'Destacado'];
-        const rows = appData.products.map(p => [
-            p.code || '',
-            `"${(p.name || '').replace(/"/g, '""')}"`,
-            `"${(p.category || '').replace(/"/g, '""')}"`,
-            p.price || 0,
-            p.originalPrice || 0,
-            p.stock || 0,
-            p.minStock || 5,
-            `"${(p.brand || '').replace(/"/g, '""')}"`,
-            `"${(p.description || '').replace(/"/g, '""').slice(0, 200)}"`,
-            p.active ? 'SI' : 'NO',
-            p.featured ? 'SI' : 'NO'
-        ]);
-        
-        content = '\uFEFF' + headers.join(';') + '\n' + rows.map(r => r.join(';')).join('\n');
-        filename = `productos_ferrecloud_${getDateString()}.csv`;
-        type = 'text/csv;charset=utf-8';
-    }
-    
-    // Descargar archivo
-    const blob = new Blob([content], { type: type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showToast('success', 'Exportado', `${appData.products.length} productos exportados`);
-}
 
 function quickView(id) {
     const p = appData.products.find(x=>x.id===id);
@@ -4649,6 +4616,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 2000);
 });
+
+// FALLBACK: Si después de 3 segundos el loader sigue visible, forzar mostrar tienda
+setTimeout(function() {
+    var l = document.getElementById('loader');
+    var s = document.getElementById('storeView');
+    if(l && s && s.style.display === 'none') {
+        console.log('Fallback: forzando mostrar tienda');
+        l.style.display = 'none';
+        s.style.display = 'block';
+    }
+}, 3000);
     </script>
 </body>
 </html>
