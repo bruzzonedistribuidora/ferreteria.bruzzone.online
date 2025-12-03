@@ -585,7 +585,7 @@
         <header class="store-header">
             <div class="header-top">
                 <div class="container">
-                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="mailto:" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText">ventas@ferrecloud.com</span></a></div>
+                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#7f" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText"><span class="__cf_email__" data-cfemail="56203338223725163033242433353a3923327835393b">[email&#160;protected]</span></span></a></div>
                     <div><i class="fas fa-truck"></i> Envío gratis en compras +$<span id="headerFreeShipping">50.000</span></div>
                 </div>
             </div>
@@ -697,7 +697,7 @@
                     </div>
                     <div class="hero-image">
                         <div class="hero-card">
-                            <div class="hero-card-grid">
+                            <div class="hero-card-grid" id="heroCategories">
                                 <div class="hero-product"><i class="fas fa-hammer"></i><span>Herramientas</span></div>
                                 <div class="hero-product"><i class="fas fa-lightbulb"></i><span>Electricidad</span></div>
                                 <div class="hero-product"><i class="fas fa-faucet"></i><span>Plomería</span></div>
@@ -764,7 +764,7 @@
                     </div>
                     <div><h4 class="footer-title">Enlaces</h4><ul class="footer-links"><li><a href="#">Inicio</a></li><li><a href="#">Productos</a></li><li><a href="#">Ofertas</a></li><li><a href="#">Contacto</a></li></ul></div>
                     <div><h4 class="footer-title">Categorías</h4><ul class="footer-links" id="footerCategories"></ul></div>
-                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail">ventas@ferrecloud.com</span></li></ul></div>
+                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f98f9c978d988ab99f9c8b8b9c9a95968c9dd79a9694">[email&#160;protected]</a></span></li></ul></div>
                 </div>
                 <div class="footer-bottom">
                     <p>&copy; 2025 <span id="footerCompanyName">FerreCloud</span>. Todos los derechos reservados.</p>
@@ -1339,7 +1339,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ==================== FIREBASE CONFIG ====================
 // Configuración de Firebase - Proyecto FerreCloud
 const firebaseConfig = {
@@ -1794,16 +1794,33 @@ function updateCategoryProductCounts() {
 function renderCategories() {
     const grid = document.getElementById('categoriesGrid');
     const footerCats = document.getElementById('footerCategories');
-    grid.innerHTML = appData.categories.filter(c => c.active).map(cat => `
+    const heroCats = document.getElementById('heroCategories');
+    
+    const activeCategories = appData.categories.filter(c => c.active);
+    
+    // Grid principal de categorías
+    grid.innerHTML = activeCategories.map(cat => `
         <div class="category-card" onclick="filterByCategory('${cat.name}')">
             <div class="category-icon"><i class="fas ${cat.icon}"></i></div>
             <div class="category-name">${cat.name}</div>
-            <div class="category-count">${cat.productCount} productos</div>
+            <div class="category-count">${cat.productCount || 0} productos</div>
         </div>
     `).join('');
-    footerCats.innerHTML = appData.categories.filter(c => c.active).slice(0, 5).map(cat => `
+    
+    // Categorías en el footer
+    footerCats.innerHTML = activeCategories.slice(0, 5).map(cat => `
         <li><a href="#" onclick="filterByCategory('${cat.name}')">${cat.name}</a></li>
     `).join('');
+    
+    // Categorías en el hero (primeras 4)
+    if(heroCats && activeCategories.length > 0) {
+        heroCats.innerHTML = activeCategories.slice(0, 4).map(cat => `
+            <div class="hero-product" onclick="filterByCategory('${cat.name}')">
+                <i class="fas ${cat.icon}"></i>
+                <span>${cat.name}</span>
+            </div>
+        `).join('');
+    }
 }
 
 function renderProducts(products = null) {
@@ -2533,12 +2550,6 @@ async function autoLoadAllImages() {
 }
 
 function editProduct(id) { showProductModal(id); }
-function deleteProduct(id) {
-    if(confirm('¿Eliminar este producto?')) {
-        appData.products = appData.products.filter(p=>p.id!==id);
-        saveData(); renderAll(); showToast('success','Eliminado','Producto eliminado');
-    }
-}
 
 function showCategoryModal(id = null) {
     document.getElementById('categoryModalTitle').textContent = id ? 'Editar Categoría' : 'Nueva Categoría';
@@ -2579,7 +2590,34 @@ function editCategory(id) { showCategoryModal(id); }
 function deleteCategory(id) {
     if(confirm('¿Eliminar esta categoría?')) {
         appData.categories = appData.categories.filter(c=>c.id!==id);
+        
+        // Eliminar de Firebase si está habilitado
+        if(firebaseEnabled && db) {
+            try {
+                db.collection('categories').doc(String(id)).delete();
+            } catch(e) {
+                console.log('Error eliminando de Firebase:', e);
+            }
+        }
+        
         saveData(); renderAll(); showToast('success','Eliminado','Categoría eliminada');
+    }
+}
+
+function deleteProduct(id) {
+    if(confirm('¿Eliminar este producto?')) {
+        appData.products = appData.products.filter(p=>p.id!==id);
+        
+        // Eliminar de Firebase si está habilitado
+        if(firebaseEnabled && db) {
+            try {
+                db.collection('products').doc(String(id)).delete();
+            } catch(e) {
+                console.log('Error eliminando de Firebase:', e);
+            }
+        }
+        
+        saveData(); renderAll(); showToast('success','Eliminado','Producto eliminado');
     }
 }
 
