@@ -4,8 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ferretería Bruzzone - Tu Ferretería Online</title>
+    
+    <!-- Forzar apertura en navegador externo desde Instagram/Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Ferretería Bruzzone">
+    <meta property="og:description" content="Tu ferretería online - Los mejores productos al mejor precio">
+    
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Detectar Instagram/Facebook WebView y mostrar botón para abrir en navegador -->
+    <script>
+    (function() {
+        var ua = navigator.userAgent || navigator.vendor || window.opera;
+        var isInstagram = ua.indexOf('Instagram') > -1;
+        var isFacebook = ua.indexOf('FBAN') > -1 || ua.indexOf('FBAV') > -1;
+        
+        if(isInstagram || isFacebook) {
+            // Mostrar overlay para abrir en navegador externo
+            document.addEventListener('DOMContentLoaded', function() {
+                var overlay = document.createElement('div');
+                overlay.id = 'webviewOverlay';
+                overlay.style.cssText = 'position:fixed;inset:0;background:linear-gradient(135deg,#2A7AB8,#1E5F8F);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;';
+                overlay.innerHTML = '<div style="background:white;border-radius:20px;padding:40px 30px;max-width:350px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
+                    '<i class="fas fa-store" style="font-size:60px;color:#2A7AB8;margin-bottom:20px;"></i>' +
+                    '<h2 style="margin:0 0 15px;color:#1A1A2E;font-size:24px;">Ferretería Bruzzone</h2>' +
+                    '<p style="color:#666;margin-bottom:25px;font-size:15px;">Para una mejor experiencia, abrí la tienda en tu navegador</p>' +
+                    '<a href="' + window.location.href + '" target="_blank" rel="noopener" style="display:block;background:#2A7AB8;color:white;padding:15px 30px;border-radius:10px;text-decoration:none;font-weight:600;font-size:16px;margin-bottom:15px;">' +
+                    '<i class="fas fa-external-link-alt" style="margin-right:8px;"></i>Abrir en Navegador</a>' +
+                    '<button onclick="document.getElementById(\'webviewOverlay\').style.display=\'none\'" style="background:none;border:2px solid #ddd;color:#666;padding:12px 25px;border-radius:10px;font-size:14px;cursor:pointer;">Continuar aquí</button>' +
+                    '</div>';
+                document.body.insertBefore(overlay, document.body.firstChild);
+            });
+        }
+    })();
+    </script>
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -872,7 +906,7 @@
                 <!-- Products -->
                 <section class="admin-section" id="section-products">
                     <div class="admin-card">
-                        <div class="card-header"><h3 class="card-title">Gestión de Productos</h3><div class="card-actions"><button class="btn btn-success" onclick="autoLoadAllImages()" title="Cargar imágenes automáticas a productos sin imagen"><i class="fas fa-magic"></i> Auto-Imágenes</button><button class="btn btn-outline" onclick="exportProducts('csv')"><i class="fas fa-file-export"></i> Exportar</button><button class="btn btn-outline" onclick="showImportModal()"><i class="fas fa-file-import"></i> Importar</button><button class="btn btn-primary" onclick="showProductModal()"><i class="fas fa-plus"></i> Nuevo</button></div></div>
+                        <div class="card-header"><h3 class="card-title">Gestión de Productos</h3><div class="card-actions"><div class="btn-group" style="display:inline-flex;gap:2px;margin-right:10px;"><button class="btn btn-success" onclick="exportImageList()" title="Descargar lista de imágenes para guardarlas"><i class="fas fa-download"></i> Exportar Imgs</button><button class="btn btn-success" onclick="autoLoadImagesByCode()" title="Asignar imágenes desde tu dominio usando el código"><i class="fas fa-images"></i> Por Código</button><button class="btn btn-outline" onclick="checkMissingImages()" title="Ver productos sin imagen"><i class="fas fa-search"></i> Sin Img</button></div><button class="btn btn-outline" onclick="exportProducts('csv')"><i class="fas fa-file-export"></i> Exportar</button><button class="btn btn-outline" onclick="showImportModal()"><i class="fas fa-file-import"></i> Importar</button><button class="btn btn-primary" onclick="showProductModal()"><i class="fas fa-plus"></i> Nuevo</button></div></div>
                         <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>Producto</th><th>Código</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="productsTableBody"></tbody></table></div></div>
                     </div>
                 </section>
@@ -3190,6 +3224,193 @@ async function autoLoadAllImages() {
     renderAll();
     
     showToast('success', 'Completado', `${productsWithoutImage.length} imágenes generadas`);
+}
+
+// Configuración de imágenes locales
+const IMAGE_BASE_URL = 'https://ferreteria.bruzzone.online/images/';
+
+// Asignar imágenes por código de producto
+function autoLoadImagesByCode() {
+    const baseUrl = prompt(
+        'URL base de tus imágenes:\n\n' +
+        'Ejemplo: https://ferreteria.bruzzone.online/images/\n\n' +
+        'Las imágenes deben llamarse igual que el código del producto.\n' +
+        'Ej: Si el código es HM-001, la imagen debe ser HM-001.jpg',
+        IMAGE_BASE_URL
+    );
+    
+    if(!baseUrl) return;
+    
+    const extension = prompt('Extensión de las imágenes:', 'jpg');
+    if(!extension) return;
+    
+    const productsWithCode = appData.products.filter(p => p.code);
+    
+    if(productsWithCode.length === 0) {
+        showToast('error', 'Error', 'No hay productos con código');
+        return;
+    }
+    
+    const confirmMsg = `Se asignarán imágenes a ${productsWithCode.length} productos.\n\n` +
+        `Ejemplo:\n` +
+        `Código: ${productsWithCode[0].code}\n` +
+        `Imagen: ${baseUrl}${productsWithCode[0].code}.${extension}\n\n` +
+        `¿Continuar?`;
+    
+    if(!confirm(confirmMsg)) return;
+    
+    let assigned = 0;
+    for(const product of productsWithCode) {
+        const imageUrl = `${baseUrl}${product.code}.${extension}`;
+        product.image = imageUrl;
+        product.images = [imageUrl];
+        assigned++;
+    }
+    
+    saveData();
+    renderAll();
+    
+    showToast('success', 'Completado', `${assigned} imágenes asignadas por código`);
+}
+
+// Verificar qué imágenes faltan
+function checkMissingImages() {
+    const missing = appData.products.filter(p => !p.image || p.image.includes('placehold'));
+    
+    if(missing.length === 0) {
+        showToast('success', 'Completo', 'Todos los productos tienen imagen');
+        return;
+    }
+    
+    let list = 'Productos SIN imagen real:\n\n';
+    missing.forEach((p, i) => {
+        if(i < 20) {
+            list += `• ${p.code || 'SIN-COD'} - ${p.name}\n`;
+        }
+    });
+    
+    if(missing.length > 20) {
+        list += `\n... y ${missing.length - 20} más`;
+    }
+    
+    list += `\n\nTotal: ${missing.length} productos sin imagen`;
+    
+    alert(list);
+}
+
+// Exportar lista de imágenes para descargar
+function exportImageList() {
+    const productsWithImages = appData.products.filter(p => p.image && !p.image.includes('placehold.co'));
+    
+    if(productsWithImages.length === 0) {
+        showToast('error', 'Error', 'No hay productos con imágenes externas');
+        return;
+    }
+    
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Imágenes de Productos - Ferretería Bruzzone</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        h1 { color: #2A7AB8; }
+        .instructions { background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .product { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .product img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
+        .product-info { flex: 1; }
+        .product-code { font-weight: bold; color: #2A7AB8; }
+        .product-name { color: #333; }
+        .download-btn { background: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; }
+        .download-btn:hover { background: #45a049; }
+        .new-name { background: #fff3cd; padding: 5px 10px; border-radius: 4px; font-family: monospace; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <h1>📸 Imágenes de Productos</h1>
+    
+    <div class="instructions">
+        <h3>📋 Instrucciones:</h3>
+        <ol>
+            <li><strong>Clic derecho</strong> en cada imagen → <strong>"Guardar imagen como..."</strong></li>
+            <li>Guardala con el nombre que aparece en <strong>amarillo</strong> (el código del producto)</li>
+            <li>Subí todas las imágenes a tu carpeta <strong>images</strong> en GitHub</li>
+            <li>En el Admin, usá el botón <strong>"Por Código"</strong> para asignarlas</li>
+        </ol>
+        <p><strong>Total de imágenes:</strong> ${productsWithImages.length}</p>
+    </div>
+    
+    <div class="products">`;
+    
+    productsWithImages.forEach(p => {
+        const newName = (p.code || 'PROD-' + p.id) + '.jpg';
+        html += `
+        <div class="product">
+            <img src="${p.image}" alt="${p.name}" onerror="this.src='https://placehold.co/80x80/ccc/666?text=Error'">
+            <div class="product-info">
+                <div class="product-code">${p.code || 'Sin código'}</div>
+                <div class="product-name">${p.name}</div>
+                <div class="new-name">📁 Guardar como: <strong>${newName}</strong></div>
+            </div>
+            <a href="${p.image}" download="${newName}" class="download-btn" target="_blank">
+                ⬇️ Descargar
+            </a>
+        </div>`;
+    });
+    
+    html += `
+    </div>
+    
+    <script>
+        // Intentar descargar automáticamente al hacer clic
+        document.querySelectorAll('.download-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // El navegador intentará descargar
+            });
+        });
+    </script>
+</body>
+</html>`;
+    
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'imagenes_productos.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('success', 'Descargado', 'Abrí el archivo HTML para ver y descargar las imágenes');
+}
+
+// Migrar imágenes a dominio local
+function migrateImagesToLocal() {
+    const baseUrl = prompt(
+        'URL base de tu carpeta de imágenes:\n\n' +
+        'Ejemplo: https://ferreteria.bruzzone.online/images/',
+        'https://ferreteria.bruzzone.online/images/'
+    );
+    
+    if(!baseUrl) return;
+    
+    const extension = prompt('Extensión de las imágenes que subiste:', 'jpg');
+    if(!extension) return;
+    
+    let migrated = 0;
+    appData.products.forEach(p => {
+        if(p.code) {
+            const newUrl = `${baseUrl}${p.code}.${extension}`;
+            p.image = newUrl;
+            p.images = [newUrl];
+            migrated++;
+        }
+    });
+    
+    saveData();
+    renderAll();
+    
+    showToast('success', 'Migrado', `${migrated} productos actualizados con imágenes locales`);
 }
 
 function editProduct(id) { showProductModal(id); }
