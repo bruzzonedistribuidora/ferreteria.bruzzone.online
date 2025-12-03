@@ -1182,6 +1182,42 @@
         </div>
     </div>
 
+    <!-- Shipping Zone Modal -->
+    <div class="modal-overlay" id="shippingModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header"><h3 class="modal-title" id="shippingModalTitle">Nueva Zona de Envío</h3><button class="modal-close" onclick="closeModal('shippingModal')"><i class="fas fa-times"></i></button></div>
+            <div class="modal-body">
+                <form id="shippingForm"><input type="hidden" id="shippingId">
+                    <div class="form-group">
+                        <label class="form-label">Nombre de la Zona *</label>
+                        <input type="text" class="form-input" id="shippingName" required placeholder="Ej: Córdoba Capital, Interior, etc.">
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Tiempo de Entrega *</label>
+                            <input type="text" class="form-input" id="shippingTime" required placeholder="Ej: 24-48hs">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Costo de Envío *</label>
+                            <input type="number" class="form-input" id="shippingCost" required min="0" value="0" placeholder="0 = Gratis">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Descripción / Localidades</label>
+                        <textarea class="form-textarea" id="shippingDescription" rows="2" placeholder="Ej: Incluye barrios céntricos, zona norte, etc."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Compra Mínima para Envío Gratis</label>
+                        <input type="number" class="form-input" id="shippingMinFree" min="0" value="0" placeholder="0 = No aplica">
+                        <span class="form-hint">Si el cliente supera este monto, el envío es gratis en esta zona.</span>
+                    </div>
+                    <div class="form-group"><label class="checkbox-item"><input type="checkbox" id="shippingActive" checked><span>Zona Activa</span></label></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('shippingModal')">Cancelar</button><button class="btn btn-primary" onclick="saveShipping()"><i class="fas fa-save"></i> Guardar</button></div>
+        </div>
+    </div>
+
     <!-- Order Detail Modal -->
     <div class="modal-overlay" id="orderModal">
         <div class="modal" style="max-width: 600px;">
@@ -1762,10 +1798,10 @@ function initSampleData() {
         { id: 12, name: 'Amoladora Angular 4.5" 850W', code: 'EL-003', category: 'Electricidad', brand: 'DeWalt', price: 125000, salePrice: null, stock: 8, minStock: 2, active: true, featured: true, badge: 'hot' }
     ];
     appData.shippingZones = [
-        { id: 1, name: 'Alejandro Roca', time: '1-2 días', cost: 0, active: true },
-        { id: 2, name: 'Córdoba Capital', time: '2-3 días', cost: 2500, active: true },
-        { id: 3, name: 'Buenos Aires', time: '3-5 días', cost: 5000, active: true },
-        { id: 4, name: 'Interior del País', time: '5-7 días', cost: 7500, active: true }
+        { id: 1, name: 'Alejandro Roca', time: '1-2 días', cost: 0, description: 'Entrega local sin cargo', minFree: 0, active: true },
+        { id: 2, name: 'Córdoba Capital', time: '2-3 días', cost: 2500, description: 'Ciudad de Córdoba y alrededores', minFree: 50000, active: true },
+        { id: 3, name: 'Buenos Aires', time: '3-5 días', cost: 5000, description: 'CABA y GBA', minFree: 80000, active: true },
+        { id: 4, name: 'Interior del País', time: '5-7 días', cost: 7500, description: 'Resto del país', minFree: 100000, active: true }
     ];
     appData.coupons = [
         { id: 1, code: 'BIENVENIDO10', type: 'percentage', value: 10, minPurchase: 10000, maxUses: 100, uses: 23, expiry: '2025-12-31', active: true },
@@ -1967,8 +2003,28 @@ function renderAdminTables() {
 
     // Shipping
     document.getElementById('shippingTableBody').innerHTML = appData.shippingZones.map(z => `
-        <tr><td><strong>${z.name}</strong></td><td>${z.time}</td><td>${z.cost===0?'<span style="color:var(--success)">Gratis</span>':'$'+formatNumber(z.cost)}</td><td><span class="status-badge ${z.active?'status-active':'status-inactive'}">${z.active?'Activa':'Inactiva'}</span></td><td><button class="action-btn" onclick="editShipping(${z.id})"><i class="fas fa-edit"></i></button><button class="action-btn danger" onclick="deleteShipping(${z.id})"><i class="fas fa-trash"></i></button></td></tr>
+        <tr>
+            <td>
+                <strong>${z.name}</strong>
+                ${z.description ? `<br><small style="color:var(--text-secondary)">${z.description}</small>` : ''}
+            </td>
+            <td><i class="fas fa-clock" style="color:var(--text-light);margin-right:5px;"></i>${z.time}</td>
+            <td>
+                ${z.cost === 0 ? '<span style="color:var(--success);font-weight:600;"><i class="fas fa-check"></i> Gratis</span>' : '$' + formatNumber(z.cost)}
+                ${z.minFree > 0 ? `<br><small style="color:var(--primary)">Gratis +$${formatNumber(z.minFree)}</small>` : ''}
+            </td>
+            <td><span class="status-badge ${z.active ? 'status-active' : 'status-inactive'}">${z.active ? 'Activa' : 'Inactiva'}</span></td>
+            <td>
+                <button class="action-btn" onclick="editShipping(${z.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                <button class="action-btn danger" onclick="deleteShipping(${z.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
     `).join('');
+    
+    // Mostrar mensaje si no hay zonas
+    if(appData.shippingZones.length === 0) {
+        document.getElementById('shippingTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-truck" style="font-size:30px;display:block;margin-bottom:10px;"></i>No hay zonas de envío configuradas<br><small>Creá tu primera zona de envío</small></td></tr>';
+    }
 
     // Coupons
     document.getElementById('couponsTableBody').innerHTML = appData.coupons.map(c => `
@@ -3715,9 +3771,86 @@ function contactCustomerFromModal() {
 
 function editCustomer(id) { showToast('info','Info','Función en desarrollo'); }
 function showCustomerModal() { showToast('info','Info','Función en desarrollo'); }
-function editShipping(id) { showToast('info','Info','Función en desarrollo'); }
-function deleteShipping(id) { if(confirm('¿Eliminar?')) { appData.shippingZones = appData.shippingZones.filter(z=>z.id!==id); saveData(); renderAll(); } }
-function showShippingModal() { showToast('info','Info','Función en desarrollo'); }
+function showShippingModal(id = null) {
+    document.getElementById('shippingModalTitle').textContent = id ? 'Editar Zona de Envío' : 'Nueva Zona de Envío';
+    document.getElementById('shippingId').value = id || '';
+    
+    if(id) {
+        const z = appData.shippingZones.find(x => x.id === id);
+        if(z) {
+            document.getElementById('shippingName').value = z.name || '';
+            document.getElementById('shippingTime').value = z.time || '';
+            document.getElementById('shippingCost').value = z.cost || 0;
+            document.getElementById('shippingDescription').value = z.description || '';
+            document.getElementById('shippingMinFree').value = z.minFree || 0;
+            document.getElementById('shippingActive').checked = z.active !== false;
+        }
+    } else {
+        document.getElementById('shippingForm').reset();
+        document.getElementById('shippingActive').checked = true;
+    }
+    
+    showModal('shippingModal');
+}
+
+function editShipping(id) { 
+    showShippingModal(id); 
+}
+
+function saveShipping() {
+    const id = document.getElementById('shippingId').value;
+    const data = {
+        name: document.getElementById('shippingName').value.trim(),
+        time: document.getElementById('shippingTime').value.trim(),
+        cost: parseFloat(document.getElementById('shippingCost').value) || 0,
+        description: document.getElementById('shippingDescription').value.trim(),
+        minFree: parseFloat(document.getElementById('shippingMinFree').value) || 0,
+        active: document.getElementById('shippingActive').checked
+    };
+    
+    if(!data.name) {
+        showToast('error', 'Error', 'Ingresá el nombre de la zona');
+        return;
+    }
+    if(!data.time) {
+        showToast('error', 'Error', 'Ingresá el tiempo de entrega');
+        return;
+    }
+    
+    if(id) {
+        const idx = appData.shippingZones.findIndex(x => x.id === parseInt(id));
+        if(idx >= 0) {
+            appData.shippingZones[idx] = { ...appData.shippingZones[idx], ...data };
+        }
+    } else {
+        data.id = Date.now();
+        appData.shippingZones.push(data);
+    }
+    
+    saveData();
+    renderAll();
+    closeModal('shippingModal');
+    showToast('success', 'Guardado', id ? 'Zona de envío actualizada' : 'Zona de envío creada');
+}
+
+function deleteShipping(id) { 
+    if(confirm('¿Eliminar esta zona de envío?')) { 
+        appData.shippingZones = appData.shippingZones.filter(z => z.id !== id); 
+        
+        // Eliminar de Firebase si está habilitado
+        if(firebaseEnabled && db) {
+            try {
+                db.collection('shippingZones').doc(String(id)).delete();
+            } catch(e) {
+                console.log('Error eliminando de Firebase:', e);
+            }
+        }
+        
+        saveData(); 
+        renderAll(); 
+        showToast('success', 'Eliminado', 'Zona de envío eliminada');
+    } 
+}
 
 // ==================== UTILITIES ====================
 function formatNumber(n) { return new Intl.NumberFormat('es-AR').format(n); }
