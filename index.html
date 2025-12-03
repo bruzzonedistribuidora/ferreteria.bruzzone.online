@@ -207,8 +207,10 @@
         .product-card:hover .product-actions { opacity: 1; transform: translateX(0); }
         .product-action-btn { width: 40px; height: 40px; background: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: 0.3s; }
         .product-action-btn:hover { background: var(--primary); color: white; }
-        .product-image { height: 200px; background: #FAFAFA; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .product-image { height: 200px; background: #FAFAFA; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; overflow: hidden; }
         .product-image i { font-size: 60px; color: var(--text-light); }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .product-card:hover .product-image img { transform: scale(1.05); }
         .image-counter { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 15px; font-size: 11px; z-index: 5; display: flex; align-items: center; gap: 4px; }
         .product-info { padding: 20px; background: #FFFFFF; }
         .product-category { font-size: 12px; color: var(--primary); font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
@@ -583,7 +585,6 @@
         .image-url-input input { flex: 1; }
         .btn-remove-image { padding: 8px 16px; background: var(--danger); color: white; border: none; border-radius: var(--radius); cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
         .btn-remove-image:hover { opacity: 0.9; }
-        .product-image img { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
 <body>
@@ -2052,18 +2053,18 @@ function initSampleData() {
         { id: 8, name: 'Iluminación', icon: 'fa-lightbulb', active: true, productCount: 0 }
     ];
     appData.products = [
-        { id: 1, name: 'Martillo Carpintero Stanley 20oz', code: 'HM-001', category: 'Herramientas Manuales', brand: 'Stanley', price: 15500, salePrice: 12900, stock: 25, minStock: 5, description: 'Martillo profesional con mango de fibra de vidrio', active: true, featured: true, badge: 'sale' },
-        { id: 2, name: 'Taladro Percutor Bosch 750W', code: 'EL-001', category: 'Electricidad', brand: 'Bosch', price: 89900, salePrice: null, stock: 12, minStock: 3, active: true, featured: true, badge: 'hot' },
-        { id: 3, name: 'Llave Francesa Ajustable 12"', code: 'HM-002', category: 'Herramientas Manuales', brand: 'Bahco', price: 18500, salePrice: null, stock: 30, minStock: 5, active: true, featured: false },
-        { id: 4, name: 'Set Destornilladores x10 pzas', code: 'HM-003', category: 'Herramientas Manuales', brand: 'Stanley', price: 8900, salePrice: 7500, stock: 45, minStock: 10, active: true, featured: true, badge: 'sale' },
-        { id: 5, name: 'Cable Unipolar 2.5mm x 100m', code: 'EL-002', category: 'Electricidad', brand: 'Trefilcon', price: 32000, salePrice: null, stock: 8, minStock: 5, active: true, featured: false },
-        { id: 6, name: 'Canilla Esférica 1/2"', code: 'PL-001', category: 'Plomería', brand: 'FV', price: 4500, salePrice: null, stock: 60, minStock: 15, active: true, featured: false },
-        { id: 7, name: 'Pintura Látex Interior 20L', code: 'PI-001', category: 'Pinturas', brand: 'Alba', price: 45000, salePrice: 39900, stock: 15, minStock: 5, active: true, featured: true, badge: 'sale' },
-        { id: 8, name: 'Cerradura de Seguridad 3 Puntos', code: 'CE-001', category: 'Cerrajería', brand: 'Prive', price: 78000, salePrice: null, stock: 6, minStock: 2, active: true, featured: true, badge: 'new' },
-        { id: 9, name: 'Tornillos Autoperforantes x500', code: 'TO-001', category: 'Tornillería', brand: 'Nacional', price: 5200, salePrice: null, stock: 100, minStock: 20, active: true, featured: false },
-        { id: 10, name: 'Manguera de Jardín 15m', code: 'JA-001', category: 'Jardinería', brand: 'Tramontina', price: 12500, salePrice: 9900, stock: 20, minStock: 5, active: true, featured: true, badge: 'sale' },
-        { id: 11, name: 'Lámpara LED Panel 60x60', code: 'IL-001', category: 'Iluminación', brand: 'Philips', price: 18900, salePrice: null, stock: 25, minStock: 5, active: true, featured: false },
-        { id: 12, name: 'Amoladora Angular 4.5" 850W', code: 'EL-003', category: 'Electricidad', brand: 'DeWalt', price: 125000, salePrice: null, stock: 8, minStock: 2, active: true, featured: true, badge: 'hot' }
+        { id: 1, name: 'Martillo Carpintero Stanley 20oz', code: 'HM-001', category: 'Herramientas Manuales', brand: 'Stanley', price: 15500, salePrice: 12900, stock: 25, minStock: 5, description: 'Martillo profesional con mango de fibra de vidrio', active: true, featured: true, badge: 'sale', image: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop'] },
+        { id: 2, name: 'Taladro Percutor Bosch 750W', code: 'EL-001', category: 'Electricidad', brand: 'Bosch', price: 89900, salePrice: null, stock: 12, minStock: 3, active: true, featured: true, badge: 'hot', image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop'] },
+        { id: 3, name: 'Llave Francesa Ajustable 12"', code: 'HM-002', category: 'Herramientas Manuales', brand: 'Bahco', price: 18500, salePrice: null, stock: 30, minStock: 5, active: true, featured: false, image: 'https://images.unsplash.com/photo-1581147036324-c17c82d3b839?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1581147036324-c17c82d3b839?w=400&h=400&fit=crop'] },
+        { id: 4, name: 'Set Destornilladores x10 pzas', code: 'HM-003', category: 'Herramientas Manuales', brand: 'Stanley', price: 8900, salePrice: 7500, stock: 45, minStock: 10, active: true, featured: true, badge: 'sale', image: 'https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=400&h=400&fit=crop'] },
+        { id: 5, name: 'Cable Unipolar 2.5mm x 100m', code: 'EL-002', category: 'Electricidad', brand: 'Trefilcon', price: 32000, salePrice: null, stock: 8, minStock: 5, active: true, featured: false, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop'] },
+        { id: 6, name: 'Canilla Esférica 1/2"', code: 'PL-001', category: 'Plomería', brand: 'FV', price: 4500, salePrice: null, stock: 60, minStock: 15, active: true, featured: false, image: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop'] },
+        { id: 7, name: 'Pintura Látex Interior 20L', code: 'PI-001', category: 'Pinturas', brand: 'Alba', price: 45000, salePrice: 39900, stock: 15, minStock: 5, active: true, featured: true, badge: 'sale', image: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&h=400&fit=crop'] },
+        { id: 8, name: 'Cerradura de Seguridad 3 Puntos', code: 'CE-001', category: 'Cerrajería', brand: 'Prive', price: 78000, salePrice: null, stock: 6, minStock: 2, active: true, featured: true, badge: 'new', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop'] },
+        { id: 9, name: 'Tornillos Autoperforantes x500', code: 'TO-001', category: 'Tornillería', brand: 'Nacional', price: 5200, salePrice: null, stock: 100, minStock: 20, active: true, featured: false, image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop'] },
+        { id: 10, name: 'Manguera de Jardín 15m', code: 'JA-001', category: 'Jardinería', brand: 'Tramontina', price: 12500, salePrice: 9900, stock: 20, minStock: 5, active: true, featured: true, badge: 'sale', image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop'] },
+        { id: 11, name: 'Lámpara LED Panel 60x60', code: 'IL-001', category: 'Iluminación', brand: 'Philips', price: 18900, salePrice: null, stock: 25, minStock: 5, active: true, featured: false, image: 'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop'] },
+        { id: 12, name: 'Amoladora Angular 4.5" 850W', code: 'EL-003', category: 'Electricidad', brand: 'DeWalt', price: 125000, salePrice: null, stock: 8, minStock: 2, active: true, featured: true, badge: 'hot', image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop', images: ['https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop'] }
     ];
     appData.shippingZones = [
         { id: 1, name: 'Alejandro Roca', time: '1-2 días', cost: 0, description: 'Entrega local sin cargo', minFree: 0, active: true },
@@ -3143,61 +3144,44 @@ function searchProductImage() {
 }
 
 async function autoLoadAllImages() {
-    const productsWithoutImage = appData.products.filter(p => !p.image);
+    const productsWithoutImage = appData.products.filter(p => !p.image && (!p.images || p.images.length === 0));
     
     if(productsWithoutImage.length === 0) {
         showToast('info', 'Info', 'Todos los productos ya tienen imagen');
         return;
     }
     
-    const confirm = window.confirm(`¿Cargar imágenes automáticas para ${productsWithoutImage.length} productos sin imagen?\n\nEsto puede tardar unos segundos.`);
+    const confirm = window.confirm(`¿Cargar imágenes automáticas para ${productsWithoutImage.length} productos sin imagen?\n\nSe generarán imágenes con el nombre del producto.`);
     if(!confirm) return;
     
-    showToast('info', 'Procesando', `Cargando imágenes para ${productsWithoutImage.length} productos...`);
+    showToast('info', 'Procesando', `Generando imágenes para ${productsWithoutImage.length} productos...`);
     
-    let loaded = 0;
-    let errors = 0;
+    // Colores de fondo según categoría
+    const categoryColors = {
+        'Herramientas Manuales': '2563EB',
+        'Electricidad': 'F59E0B',
+        'Plomería': '3B82F6',
+        'Pinturas': '10B981',
+        'Cerrajería': '6366F1',
+        'Tornillería': '6B7280',
+        'Jardinería': '059669',
+        'Iluminación': 'FBBF24',
+        'default': '2A7AB8'
+    };
     
     for(const product of productsWithoutImage) {
-        // Usar Lorem Picsum con seed basado en nombre del producto
-        const seed = encodeURIComponent((product.name || 'product').substring(0, 20) + '_' + product.id);
-        const url = `https://picsum.photos/seed/${seed}/800/600`;
+        const color = categoryColors[product.category] || categoryColors['default'];
+        const text = encodeURIComponent((product.name || 'Producto').substring(0, 15));
+        const url = `https://placehold.co/400x400/${color}/ffffff?text=${text}&font=roboto`;
         
-        // Verificar que la imagen carga
-        const success = await new Promise(resolve => {
-            const img = new Image();
-            img.onload = () => {
-                product.image = url;
-                loaded++;
-                resolve(true);
-            };
-            img.onerror = () => {
-                // Fallback a placeholder
-                const colors = ['3498db', 'e74c3c', '2ecc71', 'f39c12', '9b59b6'];
-                const color = colors[product.id % colors.length];
-                product.image = `https://via.placeholder.com/800x600/${color}/ffffff?text=${encodeURIComponent((product.name || 'Producto').substring(0,12))}`;
-                loaded++;
-                resolve(true);
-            };
-            img.src = url;
-            
-            // Timeout de 5 segundos
-            setTimeout(() => {
-                if(!product.image) {
-                    errors++;
-                    resolve(false);
-                }
-            }, 5000);
-        });
-        
-        // Pequeña pausa para no saturar
-        await new Promise(r => setTimeout(r, 200));
+        product.image = url;
+        product.images = [url];
     }
     
     saveData();
     renderAll();
     
-    showToast('success', 'Completado', `${loaded} imágenes cargadas${errors > 0 ? `, ${errors} errores` : ''}`);
+    showToast('success', 'Completado', `${productsWithoutImage.length} imágenes generadas`);
 }
 
 function editProduct(id) { showProductModal(id); }
@@ -3899,8 +3883,13 @@ function handleRegister() {
     updateCustomerUI();
     closeModal('authModal');
     
-    // Limpiar formulario
-    document.getElementById('registerForm').reset();
+    // Limpiar formulario manualmente
+    document.getElementById('registerName').value = '';
+    document.getElementById('registerEmail').value = '';
+    document.getElementById('registerPhone').value = '';
+    document.getElementById('registerAddress').value = '';
+    document.getElementById('registerPassword').value = '';
+    document.getElementById('registerPasswordConfirm').value = '';
     
     showToast('success', '¡Cuenta Creada!', `Bienvenido ${name.split(' ')[0]}`);
 }
