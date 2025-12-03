@@ -3359,15 +3359,6 @@ function exportImageList() {
     
     html += `
     </div>
-    
-    <script>
-        // Intentar descargar automáticamente al hacer clic
-        document.querySelectorAll('.download-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                // El navegador intentará descargar
-            });
-        });
-    </script>
 </body>
 </html>`;
     
@@ -4417,7 +4408,7 @@ function loadCompanyData() {
     
     // Actualizar Header
     const phone = c.phone || '(358) 412-3456';
-    const email = c.email || 'ventas@ferrecloud.com';
+    const email = c.email || '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="88feede6fce9fbc8eeedfafaedebe4e7fdeca6ebe7e5">[email&#160;protected]</a>';
     const freeShipping = c.freeShipping || 50000;
     
     document.getElementById('headerPhoneText').textContent = phone;
@@ -4668,7 +4659,7 @@ function testEmailNotification() {
         to_email: emailConfig.adminEmail,
         order_id: 'TEST-' + Date.now(),
         customer_name: 'Cliente de Prueba',
-        customer_email: 'prueba@test.com',
+        customer_email: '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6717151202050627130214134904080a">[email&#160;protected]</a>',
         customer_phone: '358-1234567',
         customer_address: 'Calle Test 123',
         products: '1x Producto de Prueba - $1.000',
