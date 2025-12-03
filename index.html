@@ -206,8 +206,9 @@
         .product-card:hover .product-actions { opacity: 1; transform: translateX(0); }
         .product-action-btn { width: 40px; height: 40px; background: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: 0.3s; }
         .product-action-btn:hover { background: var(--primary); color: white; }
-        .product-image { height: 200px; background: #FAFAFA; display: flex; align-items: center; justify-content: center; }
+        .product-image { height: 200px; background: #FAFAFA; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
         .product-image i { font-size: 60px; color: var(--text-light); }
+        .image-counter { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 15px; font-size: 11px; z-index: 5; display: flex; align-items: center; gap: 4px; }
         .product-info { padding: 20px; background: #FFFFFF; }
         .product-category { font-size: 12px; color: var(--primary); font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
         .product-name { font-weight: 600; font-size: 16px; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -559,6 +560,20 @@
         .image-preview i { font-size: 40px; color: var(--text-light); margin-bottom: 8px; }
         .image-preview span { font-size: 12px; color: var(--text-light); }
         .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Product Images Gallery */
+        .product-images-gallery { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; min-height: 100px; padding: 15px; background: var(--bg-main); border-radius: var(--radius); border: 2px dashed var(--border); }
+        .product-images-gallery:empty::after { content: 'Sin imágenes - Agregá hasta 5 imágenes'; display: flex; width: 100%; justify-content: center; align-items: center; color: var(--text-light); font-size: 14px; }
+        .gallery-image-item { position: relative; width: 100px; height: 100px; border-radius: var(--radius); overflow: hidden; border: 2px solid var(--border); }
+        .gallery-image-item img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-image-item.main { border-color: var(--primary); }
+        .gallery-image-item .main-badge { position: absolute; top: 0; left: 0; background: var(--primary); color: white; font-size: 9px; padding: 2px 6px; }
+        .gallery-image-item .remove-img { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; background: var(--danger); color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0; transition: 0.2s; }
+        .gallery-image-item:hover .remove-img { opacity: 1; }
+        .gallery-image-item .set-main { position: absolute; bottom: 5px; left: 5px; width: 22px; height: 22px; background: var(--secondary); color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0; transition: 0.2s; }
+        .gallery-image-item:hover .set-main { opacity: 1; }
+        .gallery-image-item.main .set-main { display: none; }
+        .image-upload-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .image-preview.has-image { border-style: solid; border-color: var(--primary); }
         .image-upload-options { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 200px; }
         .image-upload-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--secondary); color: white; border-radius: var(--radius); cursor: pointer; font-weight: 500; transition: 0.3s; }
@@ -1096,29 +1111,24 @@
                 <form id="productForm"><input type="hidden" id="productId">
                     <div class="form-grid">
                         <div class="form-group full">
-                            <label class="form-label">Imagen del Producto</label>
-                            <div class="image-upload-container">
-                                <div class="image-preview" id="imagePreview">
-                                    <i class="fas fa-image"></i>
-                                    <span>Sin imagen</span>
-                                </div>
-                                <div class="image-upload-options">
-                                    <div class="image-upload-btn" onclick="document.getElementById('productImage').click()">
-                                        <i class="fas fa-upload"></i> Subir imagen
-                                        <input type="file" id="productImage" accept="image/*" style="display:none" onchange="handleProductImage(this)">
-                                    </div>
-                                    <div class="image-upload-btn" onclick="searchProductImage()" style="background:#10B981;color:white;">
-                                        <i class="fas fa-magic"></i> Buscar Automática
-                                    </div>
-                                    <div class="image-url-input">
-                                        <input type="text" class="form-input" id="productImageUrl" placeholder="O pegar URL de imagen..." onchange="handleImageUrl(this.value)">
-                                    </div>
-                                    <button type="button" class="btn-remove-image" id="btnRemoveImage" onclick="removeProductImage()" style="display:none">
-                                        <i class="fas fa-trash"></i> Quitar
-                                    </button>
-                                </div>
+                            <label class="form-label">Imágenes del Producto (máx. 5)</label>
+                            <div class="product-images-gallery" id="productImagesGallery">
+                                <!-- Las imágenes se renderizan aquí -->
                             </div>
-                            <span class="form-hint">Formatos: JPG, PNG, GIF. Máx 500KB recomendado.</span>
+                            <div class="image-upload-actions">
+                                <div class="image-upload-btn" onclick="document.getElementById('productImage').click()">
+                                    <i class="fas fa-upload"></i> Subir imagen
+                                    <input type="file" id="productImage" accept="image/*" style="display:none" onchange="handleProductImage(this)" multiple>
+                                </div>
+                                <div class="image-upload-btn" onclick="searchProductImage()" style="background:#10B981;color:white;">
+                                    <i class="fas fa-magic"></i> Buscar Automática
+                                </div>
+                                <div class="image-url-input" style="flex:1;">
+                                    <input type="text" class="form-input" id="productImageUrl" placeholder="Pegar URL y presionar Enter..." onkeypress="if(event.key==='Enter'){event.preventDefault();addImageByUrl();}">
+                                </div>
+                                <button type="button" class="btn btn-outline" onclick="addImageByUrl()"><i class="fas fa-plus"></i></button>
+                            </div>
+                            <span class="form-hint">Podés agregar hasta 5 imágenes. La primera será la principal.</span>
                         </div>
                         <div class="form-group"><label class="form-label">Nombre *</label><input type="text" class="form-input" id="productName" required></div>
                         <div class="form-group"><label class="form-label">Código *</label><input type="text" class="form-input" id="productCode" required></div>
@@ -1836,15 +1846,27 @@ function renderProducts(products = null) {
     grid.innerHTML = display.map(p => {
         const badge = p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'sale' ? 'Oferta' : p.badge === 'new' ? 'Nuevo' : 'Popular'}</span>` : '';
         const price = p.salePrice ? `<span class="price-current">$${formatNumber(p.salePrice)}</span><span class="price-original">$${formatNumber(p.price)}</span>` : `<span class="price-current">$${formatNumber(p.price)}</span>`;
-        const productImage = p.image ? `<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-box-open\\'></i>'">` : '<i class="fas fa-box-open"></i>';
+        
+        // Obtener imágenes (compatibilidad con imagen única o array)
+        const images = p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []);
+        const hasMultipleImages = images.length > 1;
+        const mainImage = images[0];
+        
+        const productImageHtml = mainImage 
+            ? `<img src="${mainImage}" alt="${p.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-box-open\\'></i>'">`
+            : '<i class="fas fa-box-open"></i>';
+        
+        const imageCounter = hasMultipleImages ? `<span class="image-counter"><i class="fas fa-images"></i> ${images.length}</span>` : '';
+        
         return `
-            <div class="product-card">
+            <div class="product-card" data-product-id="${p.id}">
                 ${badge}
+                ${imageCounter}
                 <div class="product-actions">
                     <button class="product-action-btn" onclick="quickView(${p.id})" title="Vista rápida"><i class="fas fa-eye"></i></button>
                     <button class="product-action-btn" title="Favoritos"><i class="fas fa-heart"></i></button>
                 </div>
-                <div class="product-image">${productImage}</div>
+                <div class="product-image" ${hasMultipleImages ? `onclick="showProductGallery(${p.id})"` : ''}>${productImageHtml}</div>
                 <div class="product-info">
                     <div class="product-category">${p.category}</div>
                     <h3 class="product-name">${p.name}</h3>
@@ -1859,6 +1881,39 @@ function renderProducts(products = null) {
             </div>
         `;
     }).join('');
+}
+
+// Galería de imágenes del producto
+function showProductGallery(productId) {
+    const p = appData.products.find(x => x.id === productId);
+    if(!p) return;
+    
+    const images = p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []);
+    if(images.length === 0) return;
+    
+    const modal = document.createElement('div');
+    modal.id = 'productGalleryModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    
+    modal.innerHTML = `
+        <div style="position:relative;max-width:90%;max-height:90%;">
+            <button onclick="document.getElementById('productGalleryModal').remove()" style="position:absolute;top:-40px;right:0;background:none;border:none;color:white;font-size:30px;cursor:pointer;">×</button>
+            <img id="galleryMainImage" src="${images[0]}" style="max-width:100%;max-height:80vh;object-fit:contain;border-radius:10px;">
+            <div style="display:flex;justify-content:center;gap:10px;margin-top:15px;">
+                ${images.map((img, idx) => `
+                    <img src="${img}" onclick="document.getElementById('galleryMainImage').src='${img}'" 
+                        style="width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${idx === 0 ? 'var(--primary)' : 'transparent'};"
+                        onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                `).join('')}
+            </div>
+            <p style="text-align:center;color:white;margin-top:15px;">${p.name}</p>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) modal.remove();
+    });
 }
 
 function renderAdminTables() {
@@ -2178,22 +2233,17 @@ function proceedToCheckout() {
 function showModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-let currentProductImage = null; // Variable temporal para la imagen
+let currentProductImages = []; // Array de imágenes del producto
 
 function showProductModal(id = null) {
     const modal = document.getElementById('productModal');
-    const preview = document.getElementById('imagePreview');
-    const btnRemove = document.getElementById('btnRemoveImage');
     const urlInput = document.getElementById('productImageUrl');
     
     document.getElementById('productModalTitle').textContent = id ? 'Editar Producto' : 'Nuevo Producto';
     document.getElementById('productId').value = id || '';
     
-    // Reset imagen
-    currentProductImage = null;
-    preview.innerHTML = '<i class="fas fa-image"></i><span>Sin imagen</span>';
-    preview.classList.remove('has-image');
-    btnRemove.style.display = 'none';
+    // Reset imágenes
+    currentProductImages = [];
     urlInput.value = '';
     document.getElementById('productImage').value = '';
     
@@ -2211,19 +2261,50 @@ function showProductModal(id = null) {
         document.getElementById('productActive').checked = p.active;
         document.getElementById('productFeatured').checked = p.featured;
         
-        // Cargar imagen existente
-        if(p.image) {
-            currentProductImage = p.image;
-            preview.innerHTML = `<img src="${p.image}" alt="Preview">`;
-            preview.classList.add('has-image');
-            btnRemove.style.display = 'inline-flex';
-            if(!p.image.startsWith('data:')) urlInput.value = p.image;
+        // Cargar imágenes existentes
+        if(p.images && Array.isArray(p.images)) {
+            currentProductImages = [...p.images];
+        } else if(p.image) {
+            // Compatibilidad con imagen única antigua
+            currentProductImages = [p.image];
         }
     } else {
         document.getElementById('productForm').reset();
         document.getElementById('productActive').checked = true;
     }
+    
+    renderProductImagesGallery();
     showModal('productModal');
+}
+
+function renderProductImagesGallery() {
+    const gallery = document.getElementById('productImagesGallery');
+    if(!gallery) return;
+    
+    if(currentProductImages.length === 0) {
+        gallery.innerHTML = '';
+        return;
+    }
+    
+    gallery.innerHTML = currentProductImages.map((img, idx) => `
+        <div class="gallery-image-item ${idx === 0 ? 'main' : ''}">
+            <img src="${img}" alt="Imagen ${idx + 1}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23f0f0f0%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22>Error</text></svg>'">
+            ${idx === 0 ? '<span class="main-badge">PRINCIPAL</span>' : ''}
+            <button type="button" class="remove-img" onclick="removeProductImageAt(${idx})" title="Eliminar"><i class="fas fa-times"></i></button>
+            ${idx !== 0 ? `<button type="button" class="set-main" onclick="setMainImage(${idx})" title="Hacer principal"><i class="fas fa-star"></i></button>` : ''}
+        </div>
+    `).join('');
+}
+
+function removeProductImageAt(index) {
+    currentProductImages.splice(index, 1);
+    renderProductImagesGallery();
+}
+
+function setMainImage(index) {
+    const img = currentProductImages.splice(index, 1)[0];
+    currentProductImages.unshift(img);
+    renderProductImagesGallery();
 }
 
 function saveProduct() {
@@ -2240,7 +2321,8 @@ function saveProduct() {
         description: document.getElementById('productDescription').value,
         active: document.getElementById('productActive').checked,
         featured: document.getElementById('productFeatured').checked,
-        image: currentProductImage || null
+        images: currentProductImages.length > 0 ? currentProductImages : [],
+        image: currentProductImages.length > 0 ? currentProductImages[0] : null // Compatibilidad
     };
     if(!data.name||!data.code||!data.category||!data.price) { showToast('error','Error','Completá los campos requeridos'); return; }
     data.badge = data.salePrice ? 'sale' : null;
@@ -2265,28 +2347,52 @@ function saveProduct() {
 
 // ==================== IMAGE HANDLING ====================
 function handleProductImage(input) {
-    if(input.files && input.files[0]) {
-        const file = input.files[0];
+    if(input.files && input.files.length > 0) {
+        const maxImages = 5;
+        const remainingSlots = maxImages - currentProductImages.length;
         
-        // Verificar tamaño (max 500KB recomendado, 2MB máximo)
-        if(file.size > 2 * 1024 * 1024) {
-            showToast('error','Archivo muy grande','Máximo 2MB. Recomendado: menos de 500KB');
+        if(remainingSlots <= 0) {
+            showToast('warning', 'Límite alcanzado', 'Máximo 5 imágenes por producto');
             input.value = '';
             return;
         }
         
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Si es mayor a 500KB, comprimir
-            if(file.size > 500 * 1024) {
-                compressImage(e.target.result, 800, 0.7, function(compressed) {
-                    setProductImage(compressed);
-                });
-            } else {
-                setProductImage(e.target.result);
+        const filesToProcess = Array.from(input.files).slice(0, remainingSlots);
+        let processed = 0;
+        
+        filesToProcess.forEach(file => {
+            if(file.size > 2 * 1024 * 1024) {
+                showToast('warning', 'Imagen omitida', `${file.name} supera 2MB`);
+                processed++;
+                if(processed === filesToProcess.length) {
+                    renderProductImagesGallery();
+                    input.value = '';
+                }
+                return;
             }
-        };
-        reader.readAsDataURL(file);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if(file.size > 500 * 1024) {
+                    compressImage(e.target.result, 800, 0.7, function(compressed) {
+                        addProductImage(compressed);
+                        processed++;
+                        if(processed === filesToProcess.length) {
+                            renderProductImagesGallery();
+                            input.value = '';
+                        }
+                    });
+                } else {
+                    addProductImage(e.target.result);
+                    processed++;
+                    if(processed === filesToProcess.length) {
+                        renderProductImagesGallery();
+                        input.value = '';
+                    }
+                }
+            };
+            reader.readAsDataURL(file);
+        });
     }
 }
 
@@ -2313,48 +2419,52 @@ function compressImage(dataUrl, maxWidth, quality, callback) {
     img.src = dataUrl;
 }
 
-function setProductImage(imageData) {
-    currentProductImage = imageData;
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = `<img src="${imageData}" alt="Preview">`;
-    preview.classList.add('has-image');
-    document.getElementById('btnRemoveImage').style.display = 'inline-flex';
-    document.getElementById('productImageUrl').value = '';
+function addProductImage(imageData) {
+    if(currentProductImages.length >= 5) {
+        showToast('warning', 'Límite alcanzado', 'Máximo 5 imágenes');
+        return;
+    }
+    currentProductImages.push(imageData);
 }
 
-function handleImageUrl(url) {
-    if(!url) return;
+function addImageByUrl() {
+    const urlInput = document.getElementById('productImageUrl');
+    const url = urlInput.value.trim();
     
-    // Verificar que parece una URL válida de imagen
-    if(!url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) && !url.match(/^https?:\/\/.+/i)) {
-        showToast('warning','URL inválida','Ingresá una URL de imagen válida');
+    if(!url) {
+        showToast('warning', 'URL vacía', 'Ingresá una URL de imagen');
+        return;
+    }
+    
+    if(currentProductImages.length >= 5) {
+        showToast('warning', 'Límite alcanzado', 'Máximo 5 imágenes');
         return;
     }
     
     // Probar cargar la imagen
     const img = new Image();
     img.onload = function() {
-        currentProductImage = url;
-        const preview = document.getElementById('imagePreview');
-        preview.innerHTML = `<img src="${url}" alt="Preview">`;
-        preview.classList.add('has-image');
-        document.getElementById('btnRemoveImage').style.display = 'inline-flex';
-        showToast('success','Imagen cargada','URL válida');
+        currentProductImages.push(url);
+        renderProductImagesGallery();
+        urlInput.value = '';
+        showToast('success', 'Imagen agregada', 'URL válida');
     };
     img.onerror = function() {
-        showToast('error','Error','No se pudo cargar la imagen desde esa URL');
+        showToast('error', 'Error', 'No se pudo cargar la imagen desde esa URL');
     };
     img.src = url;
 }
 
+function handleImageUrl(url) {
+    // Mantener compatibilidad
+    document.getElementById('productImageUrl').value = url;
+    addImageByUrl();
+}
+
 function removeProductImage() {
-    currentProductImage = null;
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '<i class="fas fa-image"></i><span>Sin imagen</span>';
-    preview.classList.remove('has-image');
-    document.getElementById('btnRemoveImage').style.display = 'none';
-    document.getElementById('productImageUrl').value = '';
-    document.getElementById('productImage').value = '';
+    // Mantener compatibilidad - elimina todas
+    currentProductImages = [];
+    renderProductImagesGallery();
 }
 
 // ==================== AUTO IMAGE SEARCH ====================
@@ -2456,8 +2566,12 @@ function searchProductImage() {
         return;
     }
     
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:40px;color:var(--primary);"></i><span>Buscando...</span>';
+    if(currentProductImages.length >= 5) {
+        showToast('warning', 'Límite alcanzado', 'Máximo 5 imágenes');
+        return;
+    }
+    
+    showToast('info', 'Buscando', 'Buscando imagen...');
     
     // Usar Lorem Picsum que es más confiable
     const randomId = Math.floor(Math.random() * 1000);
@@ -2466,12 +2580,9 @@ function searchProductImage() {
     const img = new Image();
     
     img.onload = function() {
-        currentProductImage = url;
-        preview.innerHTML = `<img src="${url}" alt="Preview">`;
-        preview.classList.add('has-image');
-        document.getElementById('btnRemoveImage').style.display = 'inline-flex';
-        document.getElementById('productImageUrl').value = url;
-        showToast('success', 'Imagen cargada', 'Podés buscar otra si no te gusta');
+        currentProductImages.push(url);
+        renderProductImagesGallery();
+        showToast('success', 'Imagen agregada', 'Podés agregar más o buscar otra');
     };
     
     img.onerror = function() {
@@ -2480,11 +2591,8 @@ function searchProductImage() {
         const color = colors[Math.floor(Math.random() * colors.length)];
         const fallbackUrl = `https://via.placeholder.com/800x600/${color}/ffffff?text=${encodeURIComponent(name.substring(0,15))}`;
         
-        currentProductImage = fallbackUrl;
-        preview.innerHTML = `<img src="${fallbackUrl}" alt="Preview">`;
-        preview.classList.add('has-image');
-        document.getElementById('btnRemoveImage').style.display = 'inline-flex';
-        document.getElementById('productImageUrl').value = fallbackUrl;
+        currentProductImages.push(fallbackUrl);
+        renderProductImagesGallery();
         showToast('info', 'Placeholder', 'Se usó imagen genérica');
     };
     
@@ -3161,7 +3269,56 @@ function handleLogin() {
 function quickView(id) {
     const p = appData.products.find(x=>x.id===id);
     if(!p) return;
-    alert(`${p.name}\n\nPrecio: $${formatNumber(p.salePrice||p.price)}\nStock: ${p.stock} unidades\n\n${p.description||'Sin descripción'}`);
+    
+    const images = p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []);
+    const price = p.salePrice 
+        ? `<span style="text-decoration:line-through;color:#999;">$${formatNumber(p.price)}</span> <span style="color:var(--primary);font-size:24px;font-weight:700;">$${formatNumber(p.salePrice)}</span>`
+        : `<span style="color:var(--primary);font-size:24px;font-weight:700;">$${formatNumber(p.price)}</span>`;
+    
+    const modal = document.createElement('div');
+    modal.id = 'quickViewModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;';
+    
+    modal.innerHTML = `
+        <div style="background:white;border-radius:15px;max-width:800px;width:100%;max-height:90vh;overflow:auto;">
+            <div style="display:flex;flex-wrap:wrap;">
+                <div style="flex:1;min-width:280px;padding:20px;background:#f8f8f8;">
+                    <img id="qvMainImage" src="${images[0] || ''}" alt="${p.name}" style="width:100%;height:300px;object-fit:contain;border-radius:10px;background:white;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23f0f0f0%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2210%22>Sin imagen</text></svg>'">
+                    ${images.length > 1 ? `
+                        <div style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding:5px 0;">
+                            ${images.map((img, idx) => `
+                                <img src="${img}" onclick="document.getElementById('qvMainImage').src='${img}'" 
+                                    style="width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid transparent;flex-shrink:0;"
+                                    onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                <div style="flex:1;min-width:280px;padding:25px;">
+                    <button onclick="document.getElementById('quickViewModal').remove()" style="float:right;background:none;border:none;font-size:24px;cursor:pointer;color:#999;">×</button>
+                    <span style="color:var(--primary);font-size:12px;text-transform:uppercase;font-weight:600;">${p.category}</span>
+                    <h2 style="margin:10px 0;font-size:22px;">${p.name}</h2>
+                    ${p.brand ? `<p style="color:#666;margin-bottom:15px;">Marca: <strong>${p.brand}</strong></p>` : ''}
+                    <div style="margin:20px 0;">${price}</div>
+                    <p style="color:#666;font-size:14px;line-height:1.6;margin-bottom:20px;">${p.description || 'Sin descripción disponible.'}</p>
+                    <p style="color:${p.stock > 0 ? '#10B981' : '#EF4444'};font-weight:600;margin-bottom:20px;">
+                        <i class="fas ${p.stock > 0 ? 'fa-check-circle' : 'fa-times-circle'}"></i> 
+                        ${p.stock > 0 ? `${p.stock} unidades disponibles` : 'Sin stock'}
+                    </p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button onclick="addToCart(${p.id});document.getElementById('quickViewModal').remove();" style="flex:1;padding:12px 20px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;"><i class="fas fa-cart-plus"></i> Agregar</button>
+                        <button onclick="openWhatsApp('${p.name.replace(/'/g, "\\'")}');document.getElementById('quickViewModal').remove();" style="padding:12px 20px;background:#25D366;color:white;border:none;border-radius:8px;cursor:pointer;"><i class="fab fa-whatsapp"></i></button>
+                        <button onclick="shareProduct(${p.id});" style="padding:12px 20px;background:#6366F1;color:white;border:none;border-radius:8px;cursor:pointer;"><i class="fas fa-share-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) modal.remove();
+    });
 }
 
 // ==================== SETTINGS ====================
