@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         :root {
             --primary: #2A7AB8;
@@ -600,7 +601,7 @@
         <header class="store-header">
             <div class="header-top">
                 <div class="container">
-                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="mailto:" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText">ventas@ferrecloud.com</span></a></div>
+                    <div><a href="tel:" id="headerPhone"><i class="fas fa-phone"></i> <span id="headerPhoneText">(358) 412-3456</span></a> &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection#9d" id="headerEmail"><i class="fas fa-envelope"></i> <span id="headerEmailText"><span class="__cf_email__" data-cfemail="bfc9dad1cbdeccffd9dacdcddadcd3d0cadb91dcd0d2">[email&#160;protected]</span></span></a></div>
                     <div><i class="fas fa-truck"></i> Envío gratis en compras +$<span id="headerFreeShipping">50.000</span></div>
                 </div>
             </div>
@@ -779,7 +780,7 @@
                     </div>
                     <div><h4 class="footer-title">Enlaces</h4><ul class="footer-links"><li><a href="#">Inicio</a></li><li><a href="#">Productos</a></li><li><a href="#">Ofertas</a></li><li><a href="#">Contacto</a></li></ul></div>
                     <div><h4 class="footer-title">Categorías</h4><ul class="footer-links" id="footerCategories"></ul></div>
-                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail">ventas@ferrecloud.com</span></li></ul></div>
+                    <div><h4 class="footer-title">Contacto</h4><ul class="footer-links" id="footerContact"><li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">Dr. Carlos Rocha 128</span></li><li><i class="fas fa-phone"></i> <span id="footerPhone">(358) 412-3456</span></li><li><i class="fas fa-envelope"></i> <span id="footerEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c7b1a2a9b3a6b487a1a2b5b5a2a4aba8b2a3e9a4a8aa">[email&#160;protected]</a></span></li></ul></div>
                 </div>
                 <div class="footer-bottom">
                     <p>&copy; 2025 <span id="footerCompanyName">FerreCloud</span>. Todos los derechos reservados.</p>
@@ -835,6 +836,7 @@
                     <a class="menu-item" onclick="showAdminSection('company', this)"><i class="fas fa-building"></i><span>Datos Empresa</span></a>
                     <a class="menu-item" onclick="showAdminSection('shipping', this)"><i class="fas fa-truck"></i><span>Envíos</span></a>
                     <a class="menu-item" onclick="showAdminSection('payments', this)"><i class="fas fa-credit-card"></i><span>Pagos</span></a>
+                    <a class="menu-item" onclick="showAdminSection('notifications', this)"><i class="fas fa-bell"></i><span>Notificaciones</span></a>
                     <a class="menu-item" onclick="showAdminSection('wyndes', this)"><i class="fas fa-sync-alt"></i><span>Sync Wyndes</span></a>
                     <a class="menu-item" onclick="showAdminSection('firebase', this)"><i class="fas fa-cloud"></i><span>Firebase</span></a>
                     <a class="menu-item" onclick="showAdminSection('security', this)"><i class="fas fa-lock"></i><span>Seguridad</span></a>
@@ -1053,6 +1055,63 @@
                                 Si ya tenés datos guardados localmente, podés subirlos a Firebase con un clic.
                             </p>
                             <button class="btn btn-secondary" onclick="migrateToFirebase()"><i class="fas fa-cloud-upload-alt"></i> Subir Datos a Firebase</button>
+                        </div>
+                    </div>
+                </section>
+                <!-- Notifications -->
+                <section class="admin-section" id="section-notifications">
+                    <div class="admin-card">
+                        <div class="card-header"><h3 class="card-title"><i class="fas fa-bell"></i> Configuración de Notificaciones por Email</h3></div>
+                        <div class="card-body">
+                            <div class="alert" style="background:#DBEAFE;border-left:4px solid #3B82F6;padding:15px;border-radius:8px;margin-bottom:20px;">
+                                <strong><i class="fas fa-info-circle"></i> EmailJS - Servicio Gratuito</strong><br>
+                                Recibí notificaciones por email cuando lleguen nuevos pedidos. Hasta 200 emails/mes gratis.<br>
+                                <a href="https://www.emailjs.com/" target="_blank" style="color:#2563EB;">Crear cuenta en EmailJS →</a>
+                            </div>
+                            
+                            <div id="emailNotifStatus" style="background:var(--bg-main);padding:15px;border-radius:var(--radius);margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+                                <i class="fas fa-circle" style="color:#EF4444;"></i>
+                                <span>Notificaciones desactivadas</span>
+                            </div>
+                            
+                            <h4 style="margin-bottom:15px;"><i class="fas fa-cog"></i> Configuración de EmailJS</h4>
+                            <p style="color:var(--text-secondary);margin-bottom:15px;font-size:14px;">
+                                1. Creá una cuenta en <a href="https://www.emailjs.com/" target="_blank">emailjs.com</a><br>
+                                2. Agregá un servicio de email (Gmail, Outlook, etc.)<br>
+                                3. Creá un template con las variables: {{order_id}}, {{customer_name}}, {{customer_email}}, {{customer_phone}}, {{products}}, {{total}}<br>
+                                4. Copiá los IDs acá abajo
+                            </p>
+                            
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Public Key (User ID)</label>
+                                    <input type="text" class="form-input" id="emailjsPublicKey" placeholder="Ej: user_xxxxxxxxxx">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Service ID</label>
+                                    <input type="text" class="form-input" id="emailjsServiceId" placeholder="Ej: service_xxxxxxx">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Template ID (Nuevo Pedido)</label>
+                                    <input type="text" class="form-input" id="emailjsTemplateId" placeholder="Ej: template_xxxxxxx">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email del Admin (donde recibir avisos)</label>
+                                    <input type="email" class="form-input" id="emailjsAdminEmail" placeholder="tu@email.com">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="emailjsEnabled">
+                                    <span>Activar notificaciones por email</span>
+                                </label>
+                            </div>
+                            
+                            <div style="display:flex;gap:10px;margin-top:20px;">
+                                <button class="btn btn-primary" onclick="saveEmailConfig()"><i class="fas fa-save"></i> Guardar Configuración</button>
+                                <button class="btn btn-outline" onclick="testEmailNotification()"><i class="fas fa-paper-plane"></i> Enviar Email de Prueba</button>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -1410,7 +1469,7 @@
                         </div>
                         <div>
                             <h4 style="margin: 0; font-size: 18px;" id="customerAccountName">Cliente</h4>
-                            <p style="margin: 5px 0 0; opacity: 0.9; font-size: 14px;" id="customerAccountEmail">email@ejemplo.com</p>
+                            <p style="margin: 5px 0 0; opacity: 0.9; font-size: 14px;" id="customerAccountEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="147179757d7854717e717964787b3a777b79">[email&#160;protected]</a></p>
                         </div>
                     </div>
                 </div>
@@ -2285,7 +2344,7 @@ function showAdminSection(section, el) {
     if(el) el.classList.add('active');
     document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
     document.getElementById('section-'+section).classList.add('active');
-    const titles = {dashboard:'Dashboard',products:'Productos',categories:'Categorías',banners:'Banners',orders:'Pedidos',customers:'Clientes',inventory:'Inventario',coupons:'Cupones',company:'Datos Empresa',shipping:'Envíos',payments:'Pagos',wyndes:'Sync Wyndes',firebase:'Firebase',security:'Seguridad'};
+    const titles = {dashboard:'Dashboard',products:'Productos',categories:'Categorías',banners:'Banners',orders:'Pedidos',customers:'Clientes',inventory:'Inventario',coupons:'Cupones',company:'Datos Empresa',shipping:'Envíos',payments:'Pagos',notifications:'Notificaciones',wyndes:'Sync Wyndes',firebase:'Firebase',security:'Seguridad'};
     document.getElementById('adminPageTitle').textContent = titles[section]||section;
     closeMobileMenu(); // Cerrar menú en móvil al seleccionar sección
 }
@@ -2644,6 +2703,9 @@ function confirmOrder() {
     saveData();
     renderAll();
     closeModal('checkoutModal');
+    
+    // Enviar notificación por email al admin
+    sendOrderNotificationEmail(order);
     
     showToast('success', '¡Pedido Confirmado!', `Tu pedido #${order.id} fue registrado`);
     
@@ -4313,6 +4375,147 @@ function updateFirebaseStatusPanel(connected) {
     }
 }
 
+// ==================== EMAIL NOTIFICATIONS (EmailJS) ====================
+let emailConfig = {
+    enabled: false,
+    publicKey: '',
+    serviceId: '',
+    templateId: '',
+    adminEmail: ''
+};
+
+function loadEmailConfig() {
+    const saved = localStorage.getItem('ferrecloud_email_config');
+    if(saved) {
+        emailConfig = JSON.parse(saved);
+        if(emailConfig.publicKey && typeof emailjs !== 'undefined') {
+            emailjs.init(emailConfig.publicKey);
+        }
+    }
+    updateEmailStatusPanel();
+}
+
+function updateEmailStatusPanel() {
+    const el = document.getElementById('emailNotifStatus');
+    if(!el) return;
+    
+    if(emailConfig.enabled && emailConfig.publicKey && emailConfig.serviceId && emailConfig.templateId) {
+        el.innerHTML = '<i class="fas fa-circle" style="color:#10B981;"></i><span>Notificaciones activadas - Recibirás emails en: <strong>' + emailConfig.adminEmail + '</strong></span>';
+    } else {
+        el.innerHTML = '<i class="fas fa-circle" style="color:#EF4444;"></i><span>Notificaciones desactivadas</span>';
+    }
+}
+
+function saveEmailConfig() {
+    emailConfig.publicKey = document.getElementById('emailjsPublicKey').value.trim();
+    emailConfig.serviceId = document.getElementById('emailjsServiceId').value.trim();
+    emailConfig.templateId = document.getElementById('emailjsTemplateId').value.trim();
+    emailConfig.adminEmail = document.getElementById('emailjsAdminEmail').value.trim();
+    emailConfig.enabled = document.getElementById('emailjsEnabled').checked;
+    
+    if(emailConfig.enabled && (!emailConfig.publicKey || !emailConfig.serviceId || !emailConfig.templateId || !emailConfig.adminEmail)) {
+        showToast('error', 'Error', 'Completá todos los campos para activar notificaciones');
+        return;
+    }
+    
+    localStorage.setItem('ferrecloud_email_config', JSON.stringify(emailConfig));
+    
+    if(emailConfig.publicKey && typeof emailjs !== 'undefined') {
+        emailjs.init(emailConfig.publicKey);
+    }
+    
+    updateEmailStatusPanel();
+    showToast('success', 'Guardado', 'Configuración de email guardada');
+}
+
+function loadEmailConfigToForm() {
+    if(document.getElementById('emailjsPublicKey')) {
+        document.getElementById('emailjsPublicKey').value = emailConfig.publicKey || '';
+        document.getElementById('emailjsServiceId').value = emailConfig.serviceId || '';
+        document.getElementById('emailjsTemplateId').value = emailConfig.templateId || '';
+        document.getElementById('emailjsAdminEmail').value = emailConfig.adminEmail || '';
+        document.getElementById('emailjsEnabled').checked = emailConfig.enabled || false;
+    }
+}
+
+function testEmailNotification() {
+    if(!emailConfig.publicKey || !emailConfig.serviceId || !emailConfig.templateId) {
+        showToast('error', 'Error', 'Primero configurá EmailJS');
+        return;
+    }
+    
+    showToast('info', 'Enviando...', 'Enviando email de prueba...');
+    
+    const testParams = {
+        to_email: emailConfig.adminEmail,
+        order_id: 'TEST-' + Date.now(),
+        customer_name: 'Cliente de Prueba',
+        customer_email: 'prueba@test.com',
+        customer_phone: '358-1234567',
+        customer_address: 'Calle Test 123',
+        products: '1x Producto de Prueba - $1.000',
+        subtotal: '$1.000',
+        shipping: 'Gratis',
+        total: '$1.000',
+        payment_method: 'Efectivo',
+        store_name: appData.company?.name || 'FerreCloud',
+        store_phone: appData.company?.phone || ''
+    };
+    
+    emailjs.send(emailConfig.serviceId, emailConfig.templateId, testParams)
+        .then(function(response) {
+            showToast('success', '¡Email Enviado!', 'Revisá tu bandeja de entrada');
+        })
+        .catch(function(error) {
+            console.error('Error EmailJS:', error);
+            showToast('error', 'Error', 'No se pudo enviar: ' + (error.text || error.message || 'Error desconocido'));
+        });
+}
+
+function sendOrderNotificationEmail(order) {
+    if(!emailConfig.enabled || !emailConfig.publicKey || !emailConfig.serviceId || !emailConfig.templateId) {
+        console.log('Email notifications disabled or not configured');
+        return;
+    }
+    
+    const productsList = order.items.map(i => `${i.qty}x ${i.name} - $${formatNumber(i.price * i.qty)}`).join('\n');
+    
+    const params = {
+        to_email: emailConfig.adminEmail,
+        order_id: order.id,
+        customer_name: order.customer,
+        customer_email: order.email || 'No especificado',
+        customer_phone: order.phone,
+        customer_address: order.address || 'No especificada',
+        products: productsList,
+        subtotal: '$' + formatNumber(order.subtotal),
+        shipping: order.shipping === 0 ? 'Gratis' : '$' + formatNumber(order.shipping),
+        shipping_zone: order.shippingZone || '',
+        total: '$' + formatNumber(order.total),
+        payment_method: order.paymentMethod || 'No especificado',
+        notes: order.notes || 'Sin notas',
+        store_name: appData.company?.name || 'FerreCloud',
+        store_phone: appData.company?.phone || '',
+        order_date: order.date
+    };
+    
+    emailjs.send(emailConfig.serviceId, emailConfig.templateId, params)
+        .then(function(response) {
+            console.log('Email de pedido enviado correctamente');
+        })
+        .catch(function(error) {
+            console.error('Error enviando email de pedido:', error);
+        });
+}
+
+// Cargar config de email al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        loadEmailConfig();
+        loadEmailConfigToForm();
+    }, 1000);
+});
+
 async function migrateToFirebase() {
     if(!firebaseEnabled) {
         showToast('error', 'Error', 'Primero configurá y conectá Firebase');
@@ -4611,20 +4814,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('fbApiKey').value = cfg.apiKey || '';
                 document.getElementById('fbProjectId').value = cfg.projectId || '';
                 document.getElementById('fbAuthDomain').value = cfg.authDomain || '';
-                document.getElementById('fbStorageBucket').value = cfg.storageBucket || '';
-            }
+                document.getElementById('fbStorageBucket').value = cfg.storageBucket || '';            }
         }
     }, 2000);
 });
 
 // FALLBACK: Si después de 3 segundos el loader sigue visible, forzar mostrar tienda
 setTimeout(function() {
-    var l = document.getElementById('loader');
-    var s = document.getElementById('storeView');
-    if(l && s && s.style.display === 'none') {
-        console.log('Fallback: forzando mostrar tienda');
-        l.style.display = 'none';
-        s.style.display = 'block';
+    var l = document.getElementById("loader");
+    var s = document.getElementById("storeView");
+    if(l && s && s.style.display === "none") {
+        console.log("Fallback: forzando mostrar tienda");
+        l.style.display = "none";
+        s.style.display = "block";
     }
 }, 3000);
     </script>
