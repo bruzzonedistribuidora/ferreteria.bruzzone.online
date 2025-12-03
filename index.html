@@ -1410,7 +1410,7 @@
                         </div>
                         <div>
                             <h4 style="margin: 0; font-size: 18px;" id="customerAccountName">Cliente</h4>
-                            <p style="margin: 5px 0 0; opacity: 0.9; font-size: 14px;" id="customerAccountEmail">email@ejemplo.com</p>
+                            <p style="margin: 5px 0 0; opacity: 0.9; font-size: 14px;" id="customerAccountEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b7d2dad6dedbf7d2ddd2dac7dbd899d4d8da">[email&#160;protected]</a></p>
                         </div>
                     </div>
                 </div>
@@ -1574,7 +1574,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ==================== FIREBASE CONFIG ====================
 // Configuración de Firebase - Proyecto FerreCloud
 const firebaseConfig = {
@@ -4076,11 +4076,6 @@ function getDateString() {
     showToast('success', 'Exportado', `${appData.products.length} productos exportados`);
 }
 
-function getDateString() {
-    const d = new Date();
-    return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-}
-
 function quickView(id) {
     const p = appData.products.find(x=>x.id===id);
     if(!p) return;
@@ -4642,7 +4637,6 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         updateFirebaseStatusPanel(firebaseEnabled);
-        // Cargar config guardada en inputs
         const savedConfig = localStorage.getItem('ferrecloud_firebase_config');
         if(savedConfig) {
             const cfg = JSON.parse(savedConfig);
