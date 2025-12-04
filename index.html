@@ -2438,6 +2438,7 @@ function renderAdminTables() {
             <td>${c.orders || 0}</td>
             <td><strong>$${formatNumber(c.totalPurchases || 0)}</strong></td>
             <td>
+                <button class="action-btn" onclick="contactCustomerWhatsApp(${c.id})" title="WhatsApp" style="background:#25D366;"><i class="fab fa-whatsapp"></i></button>
                 <button class="action-btn" onclick="editCustomer(${c.id})" title="Editar"><i class="fas fa-edit"></i></button>
                 <button class="action-btn danger" onclick="deleteCustomer(${c.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
             </td>
@@ -5381,6 +5382,7 @@ function filterCustomers() {
             <td>${c.orders || 0}</td>
             <td><strong>$${formatNumber(c.totalPurchases || 0)}</strong></td>
             <td>
+                <button class="action-btn" onclick="contactCustomerWhatsApp(${c.id})" title="WhatsApp" style="background:#25D366;"><i class="fab fa-whatsapp"></i></button>
                 <button class="action-btn" onclick="editCustomer(${c.id})" title="Editar"><i class="fas fa-edit"></i></button>
                 <button class="action-btn danger" onclick="deleteCustomer(${c.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
             </td>
@@ -5388,7 +5390,7 @@ function filterCustomers() {
     `).join('');
     
     if(filtered.length === 0) {
-        document.getElementById('customersTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-users" style="font-size:30px;display:block;margin-bottom:10px;"></i>No se encontraron clientes<br><small>Probá con otros términos de búsqueda</small></td></tr>';
+        document.getElementById('customersTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-light;"><i class="fas fa-users" style="font-size:30px;display:block;margin-bottom:10px;"></i>No se encontraron clientes<br><small>Probá con otros términos de búsqueda</small></td></tr>';
     }
 }
 
@@ -5402,6 +5404,27 @@ function deleteCustomer(id) {
             showToast('success', 'Eliminado', 'Cliente eliminado');
         }
     }
+}
+
+function contactCustomerWhatsApp(id) {
+    const customer = appData.customers.find(c => c.id === id);
+    if(!customer) return;
+    
+    const phone = customer.phone.replace(/[^0-9]/g, '');
+    if(!phone) {
+        showToast('error', 'Error', 'Este cliente no tiene teléfono registrado');
+        return;
+    }
+    
+    // Agregar código de país si no lo tiene
+    const whatsappNumber = phone.startsWith('54') ? phone : '549' + phone;
+    
+    // Mensaje personalizado
+    const storeName = appData.company?.name || 'Ferretería Bruzzone';
+    const mensaje = `Hola ${customer.name}! Soy de ${storeName}. ¿En qué puedo ayudarte?`;
+    
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
 }
 
 function showShippingModal(id = null) {
