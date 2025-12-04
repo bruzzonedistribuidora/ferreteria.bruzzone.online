@@ -1446,9 +1446,9 @@
         </div>
     </div>
 
-    <!-- Modal MercadoLibre -->
+    <!-- Modal MercadoLibre Manual -->
     <div class="modal-overlay" id="mercadoLibreModal">
-        <div class="modal" style="max-width: 500px;">
+        <div class="modal" style="max-width: 600px;">
             <div class="modal-header">
                 <h3 class="modal-title">Importar desde MercadoLibre</h3>
                 <button class="modal-close" onclick="closeModal('mercadoLibreModal')"><i class="fas fa-times"></i></button>
@@ -1456,29 +1456,40 @@
             <div class="modal-body">
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i>
-                    <span>Pegá el link de la publicación de MercadoLibre para importar los datos</span>
+                    <span>Copiá y pegá los datos del producto de MercadoLibre</span>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Link de MercadoLibre *</label>
-                    <input type="text" class="form-input" id="mlLink" placeholder="https://articulo.mercadolibre.com.ar/MLA-..." onpaste="setTimeout(previewMercadoLibre, 100)">
-                    <small style="color:var(--text-light);margin-top:5px;display:block;">
-                        Ejemplo: https://articulo.mercadolibre.com.ar/MLA-123456789-producto
-                    </small>
-                </div>
-                <div id="mlPreview" style="display:none;margin-top:20px;padding:15px;background:var(--bg-secondary);border-radius:8px;">
-                    <div style="display:flex;gap:15px;align-items:center;">
-                        <img id="mlPreviewImg" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">
-                        <div style="flex:1;">
-                            <div id="mlPreviewTitle" style="font-weight:600;margin-bottom:5px;"></div>
-                            <div id="mlPreviewPrice" style="color:var(--primary);font-size:18px;font-weight:700;"></div>
+                <form id="mlManualForm">
+                    <div class="form-group">
+                        <label class="form-label">Título del Producto *</label>
+                        <input type="text" class="form-input" id="mlTitle" placeholder="Ejemplo: Taladro Percutor Bosch 750W">
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Precio *</label>
+                            <input type="number" class="form-input" id="mlPrice" placeholder="15000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stock</label>
+                            <input type="number" class="form-input" id="mlStock" placeholder="10" value="1">
                         </div>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-textarea" id="mlDescription" rows="4" placeholder="Descripción del producto..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">URLs de Imágenes (una por línea, máximo 5)</label>
+                        <textarea class="form-textarea" id="mlImages" rows="5" placeholder="https://http2.mlstatic.com/...&#10;https://http2.mlstatic.com/...&#10;https://http2.mlstatic.com/..."></textarea>
+                        <small style="color:var(--text-light);margin-top:5px;display:block;">
+                            Tip: Clic derecho en las imágenes de ML → "Copiar dirección de imagen"
+                        </small>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('mercadoLibreModal')">Cancelar</button>
-                <button class="btn btn-primary" onclick="importFromMercadoLibre()" id="mlImportBtn">
-                    <i class="fas fa-shopping-bag"></i> Importar Producto
+                <button class="btn btn-primary" onclick="importManualFromML()">
+                    <i class="fas fa-check"></i> Crear Producto
                 </button>
             </div>
         </div>
@@ -3031,182 +3042,55 @@ function saveProduct() {
     }
 }
 
-// ==================== MERCADOLIBRE IMPORT ====================
-function extractMLId(link) {
-    // Estrategia 1: Buscar parámetro wid (más confiable en URLs nuevas)
-    const widMatch = link.match(/[?&]wid=([^&]+)/);
-    if(widMatch) return widMatch[1];
-    
-    // Estrategia 2: Buscar parámetro sid
-    const sidMatch = link.match(/[?&]sid=([^&]+)/);
-    if(sidMatch && sidMatch[1].match(/^ML[A-Z]\d+$/)) return sidMatch[1];
-    
-    // Estrategia 3: Buscar en la URL principal (diferentes formatos)
-    const patterns = [
-        /\/(ML[A-Z]-?\d+)/,           // /MLA-123456 o /MLA123456
-        /\/(ML[A-Z][A-Z]\d+)/,        // /MLAU123456
-        /articulo\.[^\/]+\/([^\/\?#]+)/ // ID después de articulo.mercadolibre
-    ];
-    
-    for(const pattern of patterns) {
-        const match = link.match(pattern);
-        if(match) {
-            const id = match[1];
-            // Validar que parece un ID de ML
-            if(id.match(/^ML[A-Z]{1,2}-?\d+$/)) return id;
-        }
-    }
-    
-    return null;
-}
-
+// ==================== MERCADOLIBRE IMPORT MANUAL ====================
 function showMercadoLibreModal() {
-    document.getElementById('mlLink').value = '';
-    document.getElementById('mlPreview').style.display = 'none';
+    document.getElementById('mlManualForm').reset();
+    document.getElementById('mlStock').value = 1; // Default stock
     showModal('mercadoLibreModal');
 }
 
-async function previewMercadoLibre() {
-    const link = document.getElementById('mlLink').value.trim();
-    if(!link) return;
+function importManualFromML() {
+    const title = document.getElementById('mlTitle').value.trim();
+    const price = parseFloat(document.getElementById('mlPrice').value);
+    const stock = parseInt(document.getElementById('mlStock').value) || 1;
+    const description = document.getElementById('mlDescription').value.trim();
+    const imagesText = document.getElementById('mlImages').value.trim();
     
-    const itemId = extractMLId(link);
-    if(!itemId) return;
-    
-    const normalizedId = itemId.replace(/-/g, '');
-    
-    try {
-        // Usar proxy CORS para evitar bloqueo
-        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(`https://api.mercadolibre.com/items/${normalizedId}`);
-        const response = await fetch(proxyUrl);
-        if(!response.ok) return;
-        
-        const data = await response.json();
-        
-        const preview = document.getElementById('mlPreview');
-        document.getElementById('mlPreviewImg').src = data.pictures && data.pictures.length > 0 ? data.pictures[0].url : data.thumbnail;
-        document.getElementById('mlPreviewTitle').textContent = data.title;
-        document.getElementById('mlPreviewPrice').textContent = '$' + formatNumber(data.price);
-        preview.style.display = 'block';
-    } catch(error) {
-        console.log('Preview error:', error);
-    }
-}
-
-async function importFromMercadoLibre() {
-    const link = document.getElementById('mlLink').value.trim();
-    if(!link) {
-        showToast('error', 'Error', 'Pegá el link de MercadoLibre');
+    // Validar campos requeridos
+    if(!title) {
+        showToast('error', 'Error', 'El título es requerido');
         return;
     }
     
-    // Extraer ID del producto usando la función inteligente
-    const itemId = extractMLId(link);
-    if(!itemId) {
-        showToast('error', 'Error', 'Link inválido. Pegá el link completo del producto de MercadoLibre');
+    if(!price || price <= 0) {
+        showToast('error', 'Error', 'El precio debe ser mayor a 0');
         return;
     }
     
-    // Normalizar ID (quitar guiones si los tiene)
-    const normalizedId = itemId.replace(/-/g, '');
+    // Procesar imágenes (separadas por línea)
+    const imageUrls = imagesText
+        .split('\n')
+        .map(url => url.trim())
+        .filter(url => url && url.startsWith('http'))
+        .slice(0, 5); // Máximo 5
     
-    console.log('Link ML:', link);
-    console.log('ID extraído:', itemId);
-    console.log('ID normalizado:', normalizedId);
+    // Cerrar modal de ML
+    closeModal('mercadoLibreModal');
     
-    const btn = document.getElementById('mlImportBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
+    // Abrir modal de producto con datos pre-cargados
+    showProductModal();
     
-    try {
-        // Usar proxy CORS para evitar bloqueo 403
-        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(`https://api.mercadolibre.com/items/${normalizedId}`);
-        const response = await fetch(proxyUrl);
-        
-        console.log('Respuesta ML:', response.status);
-        
-        if(!response.ok) {
-            const errorText = await response.text();
-            console.error('Error ML API:', errorText);
-            throw new Error(`Producto no encontrado (${response.status}). ID: ${normalizedId}`);
-        }
-        
-        const data = await response.json();
-        
-        console.log('Datos ML recibidos:', data);
-        
-        // Validar que tengamos los datos necesarios
-        if(!data || !data.title) {
-            throw new Error('El producto no tiene datos válidos. Puede ser un agregador o listado, no un producto individual.');
-        }
-        
-        // Mostrar preview
-        const preview = document.getElementById('mlPreview');
-        document.getElementById('mlPreviewImg').src = data.pictures && data.pictures.length > 0 ? data.pictures[0].url : data.thumbnail;
-        document.getElementById('mlPreviewTitle').textContent = data.title;
-        document.getElementById('mlPreviewPrice').textContent = '$' + formatNumber(data.price);
-        preview.style.display = 'block';
-        
-        // Esperar un segundo para que vea el preview
-        await new Promise(r => setTimeout(r, 1000));
-        
-        // Cerrar modal de ML
-        closeModal('mercadoLibreModal');
-        
-        // Abrir modal de producto con datos pre-cargados
-        showProductModal();
-        
-        // Llenar campos con validaciones
-        document.getElementById('productName').value = (data.title || 'Producto sin nombre').substring(0, 100);
-        document.getElementById('productPrice').value = data.price || 0;
-        document.getElementById('productStock').value = data.available_quantity || 0;
-        
-        // Descripción: primero intentar obtener del endpoint de descripción
-        try {
-            const descProxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(`https://api.mercadolibre.com/items/${normalizedId}/description`);
-            const descResponse = await fetch(descProxyUrl);
-            if(descResponse.ok) {
-                const descData = await descResponse.json();
-                const desc = descData.plain_text || descData.text || '';
-                if(desc) {
-                    document.getElementById('productDescription').value = desc.substring(0, 500);
-                }
-            } else {
-                // Fallback: usar título o atributos
-                const attrs = data.attributes ? data.attributes.map(a => `${a.name}: ${a.value_name}`).join(', ') : '';
-                const fallbackDesc = attrs || data.title || 'Sin descripción';
-                document.getElementById('productDescription').value = fallbackDesc.substring(0, 500);
-            }
-        } catch(e) {
-            // Si falla, usar título
-            const fallbackDesc = data.title || 'Sin descripción';
-            document.getElementById('productDescription').value = fallbackDesc.substring(0, 500);
-        }
-        
-        // Imágenes (con validación)
-        currentProductImages = [];
-        if(data.pictures && Array.isArray(data.pictures) && data.pictures.length > 0) {
-            // Tomar hasta 5 imágenes válidas
-            const validPictures = data.pictures.filter(pic => pic && pic.url).slice(0, 5);
-            for(const pic of validPictures) {
-                currentProductImages.push(pic.url);
-            }
-            renderProductImagesGallery();
-        } else if(data.thumbnail) {
-            // Si no hay pictures, usar thumbnail
-            currentProductImages.push(data.thumbnail);
-            renderProductImagesGallery();
-        }
-        
-        showToast('success', '¡Importado!', 'Producto cargado desde MercadoLibre. Revisá los datos y guardá.');
-        
-    } catch(error) {
-        console.error('Error importando de ML:', error);
-        showToast('error', 'Error', 'No se pudo importar: ' + error.message);
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Importar Producto';
-    }
+    // Llenar campos
+    document.getElementById('productName').value = title.substring(0, 100);
+    document.getElementById('productPrice').value = price;
+    document.getElementById('productStock').value = stock;
+    document.getElementById('productDescription').value = description.substring(0, 500);
+    
+    // Cargar imágenes
+    currentProductImages = imageUrls;
+    renderProductImagesGallery();
+    
+    showToast('success', '¡Importado!', 'Producto cargado desde MercadoLibre. Completá categoría y código, luego guardá.');
 }
 
 // ==================== IMAGE HANDLING ====================
