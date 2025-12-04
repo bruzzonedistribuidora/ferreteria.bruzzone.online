@@ -975,7 +975,7 @@
                                     <div class="form-group"><label class="form-label">Teléfono</label><input type="text" class="form-input" id="companyPhone" value="(358) 5142098"></div>
                                     <div class="form-group"><label class="form-label">WhatsApp</label><input type="text" class="form-input" id="companyWhatsapp" value="+5493585142098"></div>
                                     <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="companyEmail" value=""></div>
-                                    <div class="form-group"><label class="form-label">Instagram</label><input type="text" class="form-input" id="companyInstagram" placeholder="@ferreteria.bruzzone"></div>
+                                    <div class="form-group"><label class="form-label">Instagram</label><input type="text" class="form-input" id="companyInstagram" placeholder="ferreteria.bruzzone"></div>
                                     <div class="form-group"><label class="form-label">Facebook</label><input type="text" class="form-input" id="companyFacebook" placeholder="ferreteriabruzzone"></div>
                                     <div class="form-group full"><label class="form-label">Descripción</label><textarea class="form-textarea" id="companyDescription">Tu ferretería de confianza con más de 10 años de experiencia.</textarea></div>
                                     <div class="form-group"><label class="form-label">Horario</label><input type="text" class="form-input" id="companyHours" value="Lun-Sab: 8:00 - 20:00"></div>
@@ -1135,7 +1135,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Email del Admin (donde recibir avisos)</label>
-                                    <input type="email" class="form-input" id="emailjsAdminEmail" placeholder="tu@email.com">
+                                    <input type="email" class="form-input" id="emailjsAdminEmail" placeholder="correo">
                                 </div>
                             </div>
                             
@@ -1441,7 +1441,7 @@
                 <div id="loginForm">
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-input" id="loginEmail" placeholder="tu@email.com">
+                        <input type="email" class="form-input" id="loginEmail" placeholder="correo">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Contraseña</label>
@@ -1463,7 +1463,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email *</label>
-                        <input type="email" class="form-input" id="registerEmail" placeholder="tu@email.com">
+                        <input type="email" class="form-input" id="registerEmail" placeholder="correo">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Teléfono *</label>
@@ -1606,7 +1606,7 @@
                         </div>
                         <div class="form-group full">
                             <label class="form-label">Email *</label>
-                            <input type="email" class="form-input" id="checkoutEmail" placeholder="tu@email.com">
+                            <input type="email" class="form-input" id="checkoutEmail" placeholder="correo">
                         </div>
                         <div class="form-group full">
                             <label class="form-label">Dirección de Envío *</label>
@@ -2114,12 +2114,12 @@ function initSampleData() {
         { id: 2, code: 'ENVIOGRATIS', type: 'fixed', value: 5000, minPurchase: 30000, maxUses: 50, uses: 12, expiry: '2025-06-30', active: true }
     ];
     appData.customers = [
-        { id: 1, name: 'Juan', lastname: 'Pérez', email: 'juan@email.com', phone: '351-1234567', orders: 5, totalPurchases: 125000 },
-        { id: 2, name: 'María', lastname: 'González', email: 'maria@email.com', phone: '358-7654321', orders: 3, totalPurchases: 67500 }
+        { id: 1, name: 'Juan', lastname: 'Pérez', email: 'juan' + '@' + 'email.com', phone: '351-1234567', orders: 5, totalPurchases: 125000 },
+        { id: 2, name: 'María', lastname: 'González', email: 'maria' + '@' + 'email.com', phone: '358-7654321', orders: 3, totalPurchases: 67500 }
     ];
     appData.orders = [
-        { id: 1001, customer: 'Juan Pérez', email: 'juan@email.com', date: '2025-01-28', total: 45600, status: 'pending', items: [] },
-        { id: 1002, customer: 'María González', email: 'maria@email.com', date: '2025-01-27', total: 89900, status: 'processing', items: [] }
+        { id: 1001, customer: 'Juan Pérez', email: 'juan' + '@' + 'email.com', date: '2025-01-28', total: 45600, status: 'pending', items: [] },
+        { id: 1002, customer: 'María González', email: 'maria' + '@' + 'email.com', date: '2025-01-27', total: 89900, status: 'processing', items: [] }
     ];
     saveData();
 }
@@ -5131,4 +5131,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 2000);
 });
 
-// FALLBACK: Si después de 3 segu
+// FALLBACK: Si después de 3 segundos el loader sigue visible, forzar mostrar tienda
+setTimeout(function() {
+    var l = document.getElementById("loader");
+    var s = document.getElementById("storeView");
+    if(l) l.style.display = "none";
+    if(s) s.style.display = "block";
+}, 3000);
+</script>
+</body>
+</html>
