@@ -908,7 +908,15 @@
                 <section class="admin-section" id="section-products">
                     <div class="admin-card">
                         <div class="card-header"><h3 class="card-title">Gestión de Productos</h3><div class="card-actions"><div class="btn-group" style="display:inline-flex;gap:2px;margin-right:10px;"><button class="btn btn-success" onclick="exportImageList()" title="Descargar lista de imágenes para guardarlas"><i class="fas fa-download"></i> Exportar Imgs</button><button class="btn btn-success" onclick="autoLoadImagesByCode()" title="Asignar imágenes desde tu dominio usando el código"><i class="fas fa-images"></i> Por Código</button><button class="btn btn-outline" onclick="checkMissingImages()" title="Ver productos sin imagen"><i class="fas fa-search"></i> Sin Img</button></div><button class="btn btn-outline" onclick="exportProducts('csv')"><i class="fas fa-file-export"></i> Exportar</button><button class="btn btn-outline" onclick="showImportModal()"><i class="fas fa-file-import"></i> Importar</button><button class="btn btn-primary" onclick="showProductModal()"><i class="fas fa-plus"></i> Nuevo</button></div></div>
-                        <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>Producto</th><th>Código</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="productsTableBody"></tbody></table></div></div>
+                        <div class="card-body">
+                            <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+                                <input type="text" class="form-input" id="searchProducts" placeholder="🔍 Buscar por nombre, código o categoría..." style="flex:1;min-width:250px;" oninput="filterProducts()">
+                                <select class="form-input" id="filterCategory" style="width:auto;min-width:150px;" onchange="filterProducts()">
+                                    <option value="">Todas las categorías</option>
+                                </select>
+                                <span id="productsCount" style="align-self:center;color:#666;font-size:14px;"></span>
+                            </div>
+                            <div class="table-responsive"><table class="data-table"><thead><tr><th>Producto</th><th>Código</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="productsTableBody"></tbody></table></div></div>
                     </div>
                 </section>
                 <!-- Categories -->
@@ -1389,11 +1397,18 @@
                         <div class="form-group"><label class="form-label">Precio Actual</label><input type="number" class="form-input" id="bannerNewPrice" placeholder="99000"></div>
                     </div>
                     <div class="form-group"><label class="form-label">Texto del Botón</label><input type="text" class="form-input" id="bannerBtnText" placeholder="¡Lo Quiero!" value="¡Lo Quiero!"></div>
-                    <div class="form-group"><label class="form-label">Enlace del Botón</label><select class="form-select" id="bannerBtnAction">
+                    <div class="form-group"><label class="form-label">Enlace del Botón</label><select class="form-select" id="bannerBtnAction" onchange="toggleBannerProductSelect()">
                         <option value="products">Ir a Productos</option>
+                        <option value="product">Ir a Producto Específico</option>
                         <option value="whatsapp">Abrir WhatsApp</option>
                         <option value="category">Ir a Categoría</option>
                     </select></div>
+                    <div class="form-group" id="bannerProductSelectContainer" style="display:none;">
+                        <label class="form-label">Seleccionar Producto</label>
+                        <select class="form-select" id="bannerProductId">
+                            <option value="">-- Elegir producto --</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label class="form-label">Imagen del Banner (800x600 px recomendado)</label>
                         <div class="image-upload-container">
@@ -2358,8 +2373,49 @@ function renderAdminTables() {
         return `<tr><td><strong>#${o.id}</strong></td><td>${o.customer}</td><td>$${formatNumber(o.total)}</td><td>${st}</td></tr>`;
     }).join('')}</tbody></table>`;
 
-    // Category select
+    // Category select for product form
     document.getElementById('productCategory').innerHTML = '<option value="">Seleccionar...</option>' + appData.categories.filter(c=>c.active).map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+    
+    // Category select for filter
+    document.getElementById('filterCategory').innerHTML = '<option value="">Todas las categorías</option>' + appData.categories.filter(c=>c.active).map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+    
+    // Products count
+    document.getElementById('productsCount').textContent = appData.products.length + ' productos';
+}
+
+// Función para filtrar productos en el admin
+function filterProducts() {
+    const searchTerm = document.getElementById('searchProducts').value.toLowerCase().trim();
+    const categoryFilter = document.getElementById('filterCategory').value;
+    
+    const filtered = appData.products.filter(p => {
+        const matchesSearch = !searchTerm || 
+            p.name.toLowerCase().includes(searchTerm) || 
+            (p.code && p.code.toLowerCase().includes(searchTerm)) ||
+            (p.category && p.category.toLowerCase().includes(searchTerm)) ||
+            (p.brand && p.brand.toLowerCase().includes(searchTerm));
+        const matchesCategory = !categoryFilter || p.category === categoryFilter;
+        return matchesSearch && matchesCategory;
+    });
+    
+    document.getElementById('productsTableBody').innerHTML = filtered.map(p => {
+        const imgContent = p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" onerror="this.outerHTML='<i class=\\'fas fa-box\\'></i>'">` : '<i class="fas fa-box"></i>';
+        return `
+        <tr>
+            <td><div class="table-product"><div class="table-product-img">${imgContent}</div><div><strong>${p.name}</strong>${p.brand ? `<br><small style="color:var(--text-secondary)">${p.brand}</small>` : ''}</div></div></td>
+            <td>${p.code}</td><td>${p.category}</td>
+            <td>${p.salePrice ? `<span style="text-decoration:line-through;color:var(--text-light)">$${formatNumber(p.price)}</span><br>` : ''}<strong>$${formatNumber(p.salePrice||p.price)}</strong></td>
+            <td><span style="color:${p.stock<=p.minStock?'var(--danger)':'var(--success)'}">${p.stock}</span></td>
+            <td><span class="status-badge ${p.active?'status-active':'status-inactive'}">${p.active?'Activo':'Inactivo'}</span></td>
+            <td><button class="action-btn" onclick="editProduct(${p.id})" title="Editar"><i class="fas fa-edit"></i></button><button class="action-btn danger" onclick="deleteProduct(${p.id})" title="Eliminar"><i class="fas fa-trash"></i></button></td>
+        </tr>
+    `}).join('');
+    
+    document.getElementById('productsCount').textContent = filtered.length + ' de ' + appData.products.length + ' productos';
+    
+    if(filtered.length === 0) {
+        document.getElementById('productsTableBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-search" style="font-size:30px;display:block;margin-bottom:10px;"></i>No se encontraron productos<br><small>Probá con otros términos de búsqueda</small></td></tr>';
+    }
 }
 
 function updateStats() {
@@ -3640,6 +3696,13 @@ function showBannerModal(id = null) {
     currentBannerImage = '';
     document.getElementById('bannerImagePreview').innerHTML = '<i class="fas fa-image"></i><span>Sin imagen</span>';
     
+    // Poblar selector de productos
+    const productSelect = document.getElementById('bannerProductId');
+    productSelect.innerHTML = '<option value="">-- Elegir producto --</option>' + 
+        appData.products.filter(p => p.active).map(p => 
+            `<option value="${p.id}">${p.name} - $${formatNumber(p.salePrice || p.price)}</option>`
+        ).join('');
+    
     if(id) {
         const b = appData.banners.find(x => x.id === id);
         if(b) {
@@ -3651,6 +3714,7 @@ function showBannerModal(id = null) {
             document.getElementById('bannerNewPrice').value = b.newPrice || '';
             document.getElementById('bannerBtnText').value = b.btnText || '¡Lo Quiero!';
             document.getElementById('bannerBtnAction').value = b.btnAction || 'products';
+            document.getElementById('bannerProductId').value = b.productId || '';
             document.getElementById('bannerOrder').value = b.order || 1;
             document.getElementById('bannerActive').checked = b.active !== false;
             if(b.image) {
@@ -3659,7 +3723,14 @@ function showBannerModal(id = null) {
             }
         }
     }
+    toggleBannerProductSelect();
     showModal('bannerModal');
+}
+
+function toggleBannerProductSelect() {
+    const action = document.getElementById('bannerBtnAction').value;
+    const container = document.getElementById('bannerProductSelectContainer');
+    container.style.display = action === 'product' ? 'block' : 'none';
 }
 
 function handleBannerImage(input) {
@@ -3695,6 +3766,7 @@ function saveBanner() {
         newPrice: parseFloat(document.getElementById('bannerNewPrice').value) || 0,
         btnText: document.getElementById('bannerBtnText').value || '¡Lo Quiero!',
         btnAction: document.getElementById('bannerBtnAction').value,
+        productId: parseInt(document.getElementById('bannerProductId').value) || null,
         image: currentBannerImage,
         order: parseInt(document.getElementById('bannerOrder').value) || 1,
         active: document.getElementById('bannerActive').checked
@@ -3702,6 +3774,11 @@ function saveBanner() {
     
     if(!banner.title) {
         showToast('error', 'Error', 'El título es requerido');
+        return;
+    }
+    
+    if(banner.btnAction === 'product' && !banner.productId) {
+        showToast('error', 'Error', 'Seleccioná un producto');
         return;
     }
     
@@ -3812,7 +3889,7 @@ function renderSlider() {
                         ${b.oldPrice ? `<span class="promo-price-old">$${formatNumber(b.oldPrice)}</span>` : ''}
                         ${b.newPrice ? `<span class="promo-price-new">$${formatNumber(b.newPrice)}</span>` : ''}
                     </div>
-                    <button class="promo-btn" onclick="${getBannerAction(b.btnAction)}">${b.btnText || '¡Lo Quiero!'}</button>
+                    <button class="promo-btn" onclick="${getBannerAction(b.btnAction, b.productId)}">${b.btnText || '¡Lo Quiero!'}</button>
                 </div>
                 <div class="promo-image">
                     ${b.image ? `<img src="${b.image}" alt="${b.title}">` : '<i class="fas fa-image"></i>'}
@@ -3832,10 +3909,11 @@ function renderSlider() {
     updateSlider();
 }
 
-function getBannerAction(action) {
+function getBannerAction(action, productId) {
     switch(action) {
         case 'whatsapp': return 'openWhatsApp()';
         case 'category': return 'scrollToProducts()';
+        case 'product': return productId ? `showProductDetail(${productId})` : 'scrollToProducts()';
         default: return 'scrollToProducts()';
     }
 }
