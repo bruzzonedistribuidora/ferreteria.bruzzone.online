@@ -3133,6 +3133,13 @@ async function importFromMercadoLibre() {
         
         const data = await response.json();
         
+        console.log('Datos ML recibidos:', data);
+        
+        // Validar que tengamos los datos necesarios
+        if(!data || !data.title) {
+            throw new Error('El producto no tiene datos válidos. Puede ser un agregador o listado, no un producto individual.');
+        }
+        
         // Mostrar preview
         const preview = document.getElementById('mlPreview');
         document.getElementById('mlPreviewImg').src = data.pictures && data.pictures.length > 0 ? data.pictures[0].url : data.thumbnail;
@@ -3149,9 +3156,9 @@ async function importFromMercadoLibre() {
         // Abrir modal de producto con datos pre-cargados
         showProductModal();
         
-        // Llenar campos
-        document.getElementById('productName').value = data.title.substring(0, 100); // Limitar a 100 chars
-        document.getElementById('productPrice').value = data.price;
+        // Llenar campos con validaciones
+        document.getElementById('productName').value = (data.title || 'Producto sin nombre').substring(0, 100);
+        document.getElementById('productPrice').value = data.price || 0;
         document.getElementById('productStock').value = data.available_quantity || 0;
         
         // Descripción: primero intentar obtener del endpoint de descripción
@@ -3161,25 +3168,33 @@ async function importFromMercadoLibre() {
             if(descResponse.ok) {
                 const descData = await descResponse.json();
                 const desc = descData.plain_text || descData.text || '';
-                document.getElementById('productDescription').value = desc.substring(0, 500);
+                if(desc) {
+                    document.getElementById('productDescription').value = desc.substring(0, 500);
+                }
             } else {
                 // Fallback: usar título o atributos
                 const attrs = data.attributes ? data.attributes.map(a => `${a.name}: ${a.value_name}`).join(', ') : '';
-                document.getElementById('productDescription').value = (attrs || data.title).substring(0, 500);
+                const fallbackDesc = attrs || data.title || 'Sin descripción';
+                document.getElementById('productDescription').value = fallbackDesc.substring(0, 500);
             }
         } catch(e) {
             // Si falla, usar título
-            document.getElementById('productDescription').value = data.title.substring(0, 500);
+            const fallbackDesc = data.title || 'Sin descripción';
+            document.getElementById('productDescription').value = fallbackDesc.substring(0, 500);
         }
         
-        // Imágenes
+        // Imágenes (con validación)
         currentProductImages = [];
-        if(data.pictures && data.pictures.length > 0) {
-            // Tomar hasta 5 imágenes
-            const images = data.pictures.slice(0, 5);
-            for(const pic of images) {
+        if(data.pictures && Array.isArray(data.pictures) && data.pictures.length > 0) {
+            // Tomar hasta 5 imágenes válidas
+            const validPictures = data.pictures.filter(pic => pic && pic.url).slice(0, 5);
+            for(const pic of validPictures) {
                 currentProductImages.push(pic.url);
             }
+            renderProductImagesGallery();
+        } else if(data.thumbnail) {
+            // Si no hay pictures, usar thumbnail
+            currentProductImages.push(data.thumbnail);
             renderProductImagesGallery();
         }
         
