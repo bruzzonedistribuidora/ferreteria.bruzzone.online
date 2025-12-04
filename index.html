@@ -1405,9 +1405,10 @@
                     </select></div>
                     <div class="form-group" id="bannerProductSelectContainer" style="display:none;">
                         <label class="form-label">Seleccionar Producto</label>
-                        <select class="form-select" id="bannerProductId">
+                        <select class="form-select" id="bannerProductId" onchange="loadProductToBanner()">
                             <option value="">-- Elegir producto --</option>
                         </select>
+                        <small style="color:var(--text-light);margin-top:5px;display:block;">Al seleccionar se cargarán automáticamente los datos del producto</small>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Imagen del Banner (800x600 px recomendado)</label>
@@ -3731,6 +3732,41 @@ function toggleBannerProductSelect() {
     const action = document.getElementById('bannerBtnAction').value;
     const container = document.getElementById('bannerProductSelectContainer');
     container.style.display = action === 'product' ? 'block' : 'none';
+}
+
+function loadProductToBanner() {
+    const productId = parseInt(document.getElementById('bannerProductId').value);
+    if(!productId) return;
+    
+    const product = appData.products.find(p => p.id === productId);
+    if(!product) return;
+    
+    // Cargar título
+    document.getElementById('bannerTitle').value = product.name;
+    
+    // Cargar precios
+    if(product.salePrice && product.salePrice < product.price) {
+        document.getElementById('bannerOldPrice').value = product.price;
+        document.getElementById('bannerNewPrice').value = product.salePrice;
+    } else {
+        document.getElementById('bannerOldPrice').value = '';
+        document.getElementById('bannerNewPrice').value = product.price;
+    }
+    
+    // Cargar imagen
+    if(product.image) {
+        currentBannerImage = product.image;
+        document.getElementById('bannerImagePreview').innerHTML = `<img src="${product.image}" alt="Preview">`;
+        document.getElementById('bannerImageUrl').value = product.image;
+    }
+    
+    // Cargar descripción si tiene
+    if(product.description) {
+        const desc = product.description.replace(/<[^>]*>/g, '').substring(0, 100);
+        document.getElementById('bannerDescription').value = desc;
+    }
+    
+    showToast('success', 'Producto cargado', 'Se cargaron los datos del producto');
 }
 
 function handleBannerImage(input) {
