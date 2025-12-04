@@ -950,7 +950,12 @@
                 <section class="admin-section" id="section-customers">
                     <div class="admin-card">
                         <div class="card-header"><h3 class="card-title">Gestión de Clientes</h3><button class="btn btn-primary" onclick="showCustomerModal()"><i class="fas fa-plus"></i> Nuevo</button></div>
-                        <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>Cliente</th><th>Email</th><th>Teléfono</th><th>Pedidos</th><th>Total Compras</th><th>Acciones</th></tr></thead><tbody id="customersTableBody"></tbody></table></div></div>
+                        <div class="card-body">
+                            <div style="margin-bottom:15px;">
+                                <input type="text" class="form-input" id="searchCustomers" placeholder="🔍 Buscar por nombre, email o teléfono..." style="width:100%;max-width:400px;" oninput="filterCustomers()">
+                            </div>
+                            <div class="table-responsive"><table class="data-table"><thead><tr><th>Cliente</th><th>Email</th><th>Teléfono</th><th>Pedidos</th><th>Total Compras</th><th>Acciones</th></tr></thead><tbody id="customersTableBody"></tbody></table></div>
+                        </div>
                     </div>
                 </section>
                 <!-- Inventory -->
@@ -1320,6 +1325,53 @@
                 </form>
             </div>
             <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('shippingModal')">Cancelar</button><button class="btn btn-primary" onclick="saveShipping()"><i class="fas fa-save"></i> Guardar</button></div>
+        </div>
+    </div>
+
+    <!-- Customer Modal -->
+    <div class="modal-overlay" id="customerModal">
+        <div class="modal" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="customerModalTitle">Nuevo Cliente</h3>
+                <button class="modal-close" onclick="closeModal('customerModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="customerForm">
+                    <input type="hidden" id="customerId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" class="form-input" id="customerName" required placeholder="Juan">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Apellido *</label>
+                            <input type="text" class="form-input" id="customerLastname" required placeholder="Pérez">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="customerEmail" placeholder="correo">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono *</label>
+                            <input type="tel" class="form-input" id="customerPhone" required placeholder="358 123-4567">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dirección</label>
+                        <input type="text" class="form-input" id="customerAddress" placeholder="Calle 123, Córdoba">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notas / Observaciones</label>
+                        <textarea class="form-textarea" id="customerNotes" rows="3" placeholder="Cliente preferencial, descuento especial, etc."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('customerModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveCustomer()"><i class="fas fa-save"></i> Guardar</button>
+            </div>
         </div>
     </div>
 
@@ -2379,7 +2431,17 @@ function renderAdminTables() {
 
     // Customers
     document.getElementById('customersTableBody').innerHTML = appData.customers.map(c => `
-        <tr><td><strong>${c.name} ${c.lastname}</strong></td><td>${c.email}</td><td>${c.phone}</td><td>${c.orders}</td><td><strong>$${formatNumber(c.totalPurchases)}</strong></td><td><button class="action-btn" onclick="editCustomer(${c.id})"><i class="fas fa-edit"></i></button></td></tr>
+        <tr>
+            <td><strong>${c.name} ${c.lastname}</strong>${c.notes ? `<br><small style="color:var(--text-secondary)">${c.notes}</small>` : ''}</td>
+            <td>${c.email || '-'}</td>
+            <td>${c.phone}</td>
+            <td>${c.orders || 0}</td>
+            <td><strong>$${formatNumber(c.totalPurchases || 0)}</strong></td>
+            <td>
+                <button class="action-btn" onclick="editCustomer(${c.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                <button class="action-btn danger" onclick="deleteCustomer(${c.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
     `).join('');
 
     // Shipping
@@ -2839,7 +2901,7 @@ function confirmOrder() {
         const idx = appData.customers.findIndex(c => c.id === currentCustomer.id);
         if(idx >= 0) {
             appData.customers[idx].orders = (appData.customers[idx].orders || 0) + 1;
-            appData.customers[idx].totalSpent = (appData.customers[idx].totalSpent || 0) + total;
+            appData.customers[idx].totalPurchases = (appData.customers[idx].totalPurchases || 0) + total;
         }
     }
     
@@ -5223,8 +5285,125 @@ function contactCustomerFromModal() {
     if(currentOrderId) contactCustomerOrder(currentOrderId);
 }
 
-function editCustomer(id) { showToast('info','Info','Función en desarrollo'); }
-function showCustomerModal() { showToast('info','Info','Función en desarrollo'); }
+// ==================== CUSTOMERS ====================
+function showCustomerModal(id = null) {
+    document.getElementById('customerModalTitle').textContent = id ? 'Editar Cliente' : 'Nuevo Cliente';
+    document.getElementById('customerForm').reset();
+    document.getElementById('customerId').value = '';
+    
+    if(id) {
+        const customer = appData.customers.find(c => c.id === id);
+        if(customer) {
+            document.getElementById('customerId').value = customer.id;
+            document.getElementById('customerName').value = customer.name || '';
+            document.getElementById('customerLastname').value = customer.lastname || '';
+            document.getElementById('customerEmail').value = customer.email || '';
+            document.getElementById('customerPhone').value = customer.phone || '';
+            document.getElementById('customerAddress').value = customer.address || '';
+            document.getElementById('customerNotes').value = customer.notes || '';
+        }
+    }
+    
+    showModal('customerModal');
+}
+
+function saveCustomer() {
+    const id = document.getElementById('customerId').value;
+    const name = document.getElementById('customerName').value.trim();
+    const lastname = document.getElementById('customerLastname').value.trim();
+    const email = document.getElementById('customerEmail').value.trim();
+    const phone = document.getElementById('customerPhone').value.trim();
+    const address = document.getElementById('customerAddress').value.trim();
+    const notes = document.getElementById('customerNotes').value.trim();
+    
+    // Validar campos requeridos
+    if(!name || !lastname || !phone) {
+        showToast('error', 'Error', 'Completá los campos requeridos (Nombre, Apellido, Teléfono)');
+        return;
+    }
+    
+    const customerData = {
+        name: name,
+        lastname: lastname,
+        email: email,
+        phone: phone,
+        address: address,
+        notes: notes,
+        orders: 0,
+        totalPurchases: 0
+    };
+    
+    if(id) {
+        // Editar cliente existente
+        const idx = appData.customers.findIndex(c => c.id === parseInt(id));
+        if(idx >= 0) {
+            // Mantener el historial de pedidos y compras
+            customerData.orders = appData.customers[idx].orders || 0;
+            customerData.totalPurchases = appData.customers[idx].totalPurchases || 0;
+            appData.customers[idx] = { ...appData.customers[idx], ...customerData };
+        }
+    } else {
+        // Nuevo cliente
+        customerData.id = Date.now();
+        appData.customers.push(customerData);
+    }
+    
+    saveData();
+    renderAll();
+    closeModal('customerModal');
+    showToast('success', 'Guardado', id ? 'Cliente actualizado' : 'Cliente creado');
+}
+
+function editCustomer(id) {
+    showCustomerModal(id);
+}
+
+// Función para filtrar clientes
+function filterCustomers() {
+    const searchTerm = document.getElementById('searchCustomers').value.toLowerCase().trim();
+    
+    const filtered = appData.customers.filter(c => {
+        const fullName = `${c.name} ${c.lastname}`.toLowerCase();
+        const email = (c.email || '').toLowerCase();
+        const phone = (c.phone || '').toLowerCase();
+        
+        return !searchTerm || 
+            fullName.includes(searchTerm) ||
+            email.includes(searchTerm) ||
+            phone.includes(searchTerm);
+    });
+    
+    document.getElementById('customersTableBody').innerHTML = filtered.map(c => `
+        <tr>
+            <td><strong>${c.name} ${c.lastname}</strong>${c.notes ? `<br><small style="color:var(--text-secondary)">${c.notes}</small>` : ''}</td>
+            <td>${c.email || '-'}</td>
+            <td>${c.phone}</td>
+            <td>${c.orders || 0}</td>
+            <td><strong>$${formatNumber(c.totalPurchases || 0)}</strong></td>
+            <td>
+                <button class="action-btn" onclick="editCustomer(${c.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                <button class="action-btn danger" onclick="deleteCustomer(${c.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+    
+    if(filtered.length === 0) {
+        document.getElementById('customersTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-users" style="font-size:30px;display:block;margin-bottom:10px;"></i>No se encontraron clientes<br><small>Probá con otros términos de búsqueda</small></td></tr>';
+    }
+}
+
+function deleteCustomer(id) {
+    if(confirm('¿Eliminar este cliente? Se perderá el historial asociado.')) {
+        const idx = appData.customers.findIndex(c => c.id === id);
+        if(idx >= 0) {
+            appData.customers.splice(idx, 1);
+            saveData();
+            renderAll();
+            showToast('success', 'Eliminado', 'Cliente eliminado');
+        }
+    }
+}
+
 function showShippingModal(id = null) {
     document.getElementById('shippingModalTitle').textContent = id ? 'Editar Zona de Envío' : 'Nueva Zona de Envío';
     document.getElementById('shippingId').value = id || '';
