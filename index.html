@@ -3073,8 +3073,12 @@ async function previewMercadoLibre() {
     const itemId = extractMLId(link);
     if(!itemId) return;
     
+    const normalizedId = itemId.replace(/-/g, '');
+    
     try {
-        const response = await fetch(`https://api.mercadolibre.com/items/${itemId}`);
+        // Usar proxy CORS para evitar bloqueo
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(`https://api.mercadolibre.com/items/${normalizedId}`);
+        const response = await fetch(proxyUrl);
         if(!response.ok) return;
         
         const data = await response.json();
@@ -3102,14 +3106,30 @@ async function importFromMercadoLibre() {
         showToast('error', 'Error', 'Link inválido. Pegá el link completo del producto de MercadoLibre');
         return;
     }
+    
+    // Normalizar ID (quitar guiones si los tiene)
+    const normalizedId = itemId.replace(/-/g, '');
+    
+    console.log('Link ML:', link);
+    console.log('ID extraído:', itemId);
+    console.log('ID normalizado:', normalizedId);
+    
     const btn = document.getElementById('mlImportBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
     
     try {
-        // Llamar a la API de MercadoLibre
-        const response = await fetch(`https://api.mercadolibre.com/items/${itemId}`);
-        if(!response.ok) throw new Error('Producto no encontrado');
+        // Usar proxy CORS para evitar bloqueo 403
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(`https://api.mercadolibre.com/items/${normalizedId}`);
+        const response = await fetch(proxyUrl);
+        
+        console.log('Respuesta ML:', response.status);
+        
+        if(!response.ok) {
+            const errorText = await response.text();
+            console.error('Error ML API:', errorText);
+            throw new Error(`Producto no encontrado (${response.status}). ID: ${normalizedId}`);
+        }
         
         const data = await response.json();
         
@@ -3136,7 +3156,8 @@ async function importFromMercadoLibre() {
         
         // Descripción: primero intentar obtener del endpoint de descripción
         try {
-            const descResponse = await fetch(`https://api.mercadolibre.com/items/${itemId}/description`);
+            const descProxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(`https://api.mercadolibre.com/items/${normalizedId}/description`);
+            const descResponse = await fetch(descProxyUrl);
             if(descResponse.ok) {
                 const descData = await descResponse.json();
                 const desc = descData.plain_text || descData.text || '';
