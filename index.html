@@ -650,7 +650,7 @@
                         <span class="logo-text" style="display:none;">Ferretería <span>Bruzzone</span></span>
                     </a>
                     <div class="search-box">
-                        <input type="text" placeholder="Buscar productos..." id="searchInput" onkeyup="searchProducts()">
+                        <input type="text" placeholder="Buscar productos..." id="searchInput" onkeyup="searchProducts()" autocomplete="off">
                         <button><i class="fas fa-search"></i></button>
                     </div>
                     <div class="header-actions">
@@ -2036,6 +2036,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var store = document.getElementById('storeView');
     if(loader) loader.style.display = 'none';
     if(store) store.style.display = 'block';
+    
+    // Limpiar buscador (evitar autocompletado)
+    var searchInput = document.getElementById('searchInput');
+    if(searchInput) searchInput.value = '';
     
     console.log('Loader oculto, tienda visible');
     
