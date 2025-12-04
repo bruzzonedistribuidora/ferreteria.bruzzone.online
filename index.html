@@ -3032,6 +3032,34 @@ function saveProduct() {
 }
 
 // ==================== MERCADOLIBRE IMPORT ====================
+function extractMLId(link) {
+    // Estrategia 1: Buscar parámetro wid (más confiable en URLs nuevas)
+    const widMatch = link.match(/[?&]wid=([^&]+)/);
+    if(widMatch) return widMatch[1];
+    
+    // Estrategia 2: Buscar parámetro sid
+    const sidMatch = link.match(/[?&]sid=([^&]+)/);
+    if(sidMatch && sidMatch[1].match(/^ML[A-Z]\d+$/)) return sidMatch[1];
+    
+    // Estrategia 3: Buscar en la URL principal (diferentes formatos)
+    const patterns = [
+        /\/(ML[A-Z]-?\d+)/,           // /MLA-123456 o /MLA123456
+        /\/(ML[A-Z][A-Z]\d+)/,        // /MLAU123456
+        /articulo\.[^\/]+\/([^\/\?#]+)/ // ID después de articulo.mercadolibre
+    ];
+    
+    for(const pattern of patterns) {
+        const match = link.match(pattern);
+        if(match) {
+            const id = match[1];
+            // Validar que parece un ID de ML
+            if(id.match(/^ML[A-Z]{1,2}-?\d+$/)) return id;
+        }
+    }
+    
+    return null;
+}
+
 function showMercadoLibreModal() {
     document.getElementById('mlLink').value = '';
     document.getElementById('mlPreview').style.display = 'none';
@@ -3042,10 +3070,8 @@ async function previewMercadoLibre() {
     const link = document.getElementById('mlLink').value.trim();
     if(!link) return;
     
-    const match = link.match(/ML[A-Z]-\d+/);
-    if(!match) return;
-    
-    const itemId = match[0];
+    const itemId = extractMLId(link);
+    if(!itemId) return;
     
     try {
         const response = await fetch(`https://api.mercadolibre.com/items/${itemId}`);
@@ -3070,14 +3096,12 @@ async function importFromMercadoLibre() {
         return;
     }
     
-    // Extraer ID del producto (MLA-123456789, MLU-123456789, etc.)
-    const match = link.match(/ML[A-Z]-\d+/);
-    if(!match) {
-        showToast('error', 'Error', 'Link inválido. Debe contener el código del producto (MLA-123456...)');
+    // Extraer ID del producto usando la función inteligente
+    const itemId = extractMLId(link);
+    if(!itemId) {
+        showToast('error', 'Error', 'Link inválido. Pegá el link completo del producto de MercadoLibre');
         return;
     }
-    
-    const itemId = match[0];
     const btn = document.getElementById('mlImportBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
